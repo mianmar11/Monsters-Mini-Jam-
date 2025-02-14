@@ -6,13 +6,15 @@ class Tile:
         self.tile_size = tile_size
         self.pos = pos[0] * self.tile_size, pos[1] * self.tile_size
 
-        self.image = pygame.Surface((self.tile_size, self.tile_size)).convert_alpha()
+        self.image = pygame.Surface((self.tile_size, self.tile_size), pygame.SRCALPHA).convert_alpha()
         self.rect = self.image.get_rect(topleft=self.pos)
 
-        if self.tile_type == 'grass':
-            self.image.fill('#32a852')
-        elif self.tile_type == 'dark grass':
-            self.image.fill('#146138')
+        if self.tile_type == 'dirt': # white dirt
+            self.image.fill('#d9a066')
+        elif self.tile_type == 'dirt2': # darker dirt
+            self.image.fill('#bc8750')
+        elif self.tile_type == 'edge': # dark edge 
+            self.image.fill('#663931')
     
     def draw(self, draw_surf, camera_offset):
         render_x = self.rect.x - camera_offset[0]

@@ -13,15 +13,18 @@ class Player(Entity):
             'left': False,
             'right': False
         }
-        self.vel = vec2(0, 0)
         self.speed = 2.4
     
-    def move(self):
-        self.x += self.vel.x * self.dt
+    def move(self, tiles):
         self.y += self.vel.y * self.dt
-
-        self.rect.x = self.x
         self.rect.y = self.y
+        self.vertical_collision(tiles)
+        self.rect.y = self.y
+
+        self.x += self.vel.x * self.dt
+        self.rect.x = self.x
+        self.horizontal_collision(tiles)
+        self.rect.x = self.x
 
     def keydown(self, key):
         if key == pygame.K_w:
@@ -64,5 +67,4 @@ class Player(Entity):
         super().update(delta_time)
 
         self.set_vel()
-        self.move()
     
