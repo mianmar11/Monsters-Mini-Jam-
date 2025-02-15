@@ -22,8 +22,6 @@ class Entity:
     
     def vertical_collision(self, tiles):
         for tile in tiles:
-            if tile.tile_type not in ['air', 'edge']:
-                continue
 
             if tile.rect.colliderect(self.rect):
                 # dual process
@@ -56,8 +54,6 @@ class Entity:
                 
     def horizontal_collision(self, tiles):
         for tile in tiles:
-            if tile.tile_type not in ['air', 'edge']:
-                continue
 
             if tile.rect.colliderect(self.rect):
                 # dual process

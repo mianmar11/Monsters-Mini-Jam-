@@ -1,12 +1,10 @@
-import noise, random
+import noise
 import math
 
-def generate_world_data(world_size):
+def generate_world_data(world_size, terrain_data:dict, seed):
     tiles = {}
     center_x, center_y = world_size[0] // 2, world_size[1] // 2  # Center of the map
     max_distance = math.sqrt(center_x ** 2 + center_y ** 2)  # Max possible distance from center
-
-    seed = random.randint(0, 256)
 
     for y in range(world_size[1]):
         for x in range(world_size[0]):
@@ -24,12 +22,10 @@ def generate_world_data(world_size):
 
             # Determine terrain type
             terrain_type = 'air'
-            if -0.3 < value <= 1:
-                terrain_type = 'dirt'
-            elif -0.5 < value <= -0.3:
-                terrain_type = 'dirt2'
-
-            # if terrain_type != 'air':
+            for data in terrain_data:
+                if data[0] <= value <= data[1]:
+                    terrain_type = terrain_data[data]
+                    break
             tiles[(x, y)] = terrain_type
     
     return tiles

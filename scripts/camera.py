@@ -9,7 +9,7 @@ class Camera:
         self.tile_size = tile_size
 
         self.gap = [0, 0]
-        self.gap_size = self.tile_size
+        self.gap_size = self.tile_size * 3
 
         self.scroll = [0, 0]
         self.camera_speed = 10

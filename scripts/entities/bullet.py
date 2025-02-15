@@ -8,7 +8,7 @@ class Bullet:
         self.hitbox = [0, 0, self.tile_size, self.tile_size/2]
 
         self.image = pygame.Surface((self.tile_size, self.tile_size/2), pygame.SRCALPHA).convert_alpha()
-        pygame.draw.rect(self.image, 'green', self.hitbox)
+        pygame.draw.rect(self.image, 'yellow', self.hitbox)
         pygame.draw.rect(self.image, 'white', (1, 1, self.hitbox[2] - 2, self.hitbox[3] - 2))
 
         self.angle = angle
