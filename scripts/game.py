@@ -29,7 +29,9 @@ class Game:
         self.tiles = self.chunking(self.tiles)
         self.collideable_tiles = self.chunking(self.collideable_tiles)
 
-        spawn_area = [pos for pos, tile in self.tiles.items() if tile.tile_type not in ('air', 'edge')]
+        spawn_area =  [pos for pos, tile in self.tiles.items() if tile.tile_type not in ('air', 'edge')]
+        spawn_area = [pos for pos in spawn_area if self.collideable_tiles[pos].tile_type in ('air', 'edge')]
+        spawn_area = [pos for pos in spawn_area if ((pos[0] - self.WORLD_MAP_SIZE[0]//2)**2 + (pos[1] - self.WORLD_MAP_SIZE[1]//2)**2)**0.5 < self.WORLD_MAP_SIZE[1]/3]
         spawn_point = random.choice(spawn_area)
         self.player = Player(self.tile_size, spawn_point)
 
@@ -66,6 +68,10 @@ class Game:
 
                 if terrain_type == 'dirt' or terrain_type == 'dirt2':
                     
+                    # if there is no tile (void | out of world) on top of current tile, make the current tile air tile
+                    if (pos[0], pos[1] - 1) not in data:
+                        terrain_type = 'air'
+                    
                     # if there is no tile (void | out of world) underneath current tile, make the current tile edge tile
                     if (pos[0], pos[1] + 1) not in data:
                         terrain_type = 'edge' if (pos[0], pos[1] - 1) in data and data[(pos[0], pos[1] - 1)] in ['dirt', 'dirt2'] else 'air'
@@ -98,9 +104,9 @@ class Game:
 
         if mbutton[0]:
             if self.weapon.shoot():
-                self.bullet_manager.add_bullet(self.player.rect.center, angle + random.randint(-4, 4))
+                self.bullet_manager.add_bullet(self.player.rect.center, angle + random.randint(-3, 3))
 
-                self.player.ext_vel = vec2(-1, 0).rotate(angle).normalize() * 1
+                self.player.ext_vel = vec2(-1, 0).rotate(angle).normalize() * 1 # knockback
                 self.camera.start_shake(1)
         
         self.player.update(self.dt)
@@ -115,7 +121,7 @@ class Game:
         self.player.move(collide_tiles)
 
         self.weapon.update(self.dt)
-        self.bullet_manager.update(self.dt)
+        self.bullet_manager.update(self.dt, self.collideable_tiles)
 
         self.draw(camera_offset)
 

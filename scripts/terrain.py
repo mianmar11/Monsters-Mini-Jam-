@@ -15,7 +15,7 @@ def generate_world_data(world_size, terrain_data:dict, seed):
             dx, dy = x - center_x, y - center_y
             distance = math.sqrt(dx**2 + dy**2)
             t = distance / max_distance
-            falloff = (1 - math.cos(t * math.pi)) * 0.58
+            falloff = (1 - math.cos(t * math.pi)) * 0.8
 
             # Apply falloff (reduces terrain values near edges)
             value -= falloff  

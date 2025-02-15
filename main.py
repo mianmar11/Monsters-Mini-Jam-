@@ -42,7 +42,7 @@ class App:
             if dt > 3: 
                 dt = 3
 
-            self.window.fill((0, 0, 0))
+            self.window.fill((30, 30, 30))
             self.game.update(dt)
             
             fps = self.font.render(f'FPS: {self.fps}', True, 'white')

@@ -46,7 +46,10 @@ def auto_tile(tiles, tile_size):
         # horizontal tiles
         tuple(sorted([(1, 0)])): [(0, 0, tile_size/8, tile_size), (0, 0, tile_size, tile_size/8), (0, tile_size - tile_size/8, tile_size, tile_size/8)], # left
         tuple(sorted([(1, 0), (-1, 0)])): [(0, 0, tile_size, tile_size/8), (0, tile_size - tile_size/8, tile_size, tile_size/8)], # middle
-        tuple(sorted([(-1, 0)])): [(0, 0, tile_size, tile_size/8), (0, tile_size - tile_size/8, tile_size, tile_size/8), (tile_size - tile_size/8, 0, tile_size/8, tile_size)], # right
+        tuple(sorted([(-1, 0)])): [(0, 0, tile_size, tile_size/8), (0, tile_size - tile_size/8, tile_size, tile_size/8), (tile_size - tile_size/8, 0, tile_size/8, tile_size)], # right,
+
+        # single tiles
+        (): [(0, 0, tile_size, tile_size/8), (0, 0, tile_size/8, tile_size), (tile_size - tile_size/8, 0, tile_size/8, tile_size), (0, tile_size - tile_size/8, tile_size, tile_size/8)], # single
     }
 
     for pos in tiles:
