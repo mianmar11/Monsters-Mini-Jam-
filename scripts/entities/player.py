@@ -16,12 +16,15 @@ class Player(Entity):
         self.speed = 2.4
     
     def move(self, tiles):
-        self.y += self.vel.y * self.dt
+        if self.vel.length() > 0:
+            self.vel = self.vel.normalize()
+
+        self.y += (self.vel.y * self.speed + self.ext_vel.y) * self.dt
         self.rect.y = self.y
         self.vertical_collision(tiles)
         self.rect.y = self.y
 
-        self.x += self.vel.x * self.dt
+        self.x += (self.vel.x * self.speed + self.ext_vel.x) * self.dt
         self.rect.x = self.x
         self.horizontal_collision(tiles)
         self.rect.x = self.x
@@ -59,12 +62,15 @@ class Player(Entity):
             self.vel.x = 1
         elif self.directions['left']:
             self.vel.x = -1
-        
-        if self.vel.length() > 0:
-            self.vel = self.vel.normalize() * self.speed
-    
+
     def update(self, delta_time):
         super().update(delta_time)
 
         self.set_vel()
-    
+
+
+        if round(self.ext_vel.length(), 2) < 0.1:
+            self.ext_vel = vec2(0, 0)
+        else:
+            self.ext_vel.x += (0 - self.ext_vel.x) * self.dt
+            self.ext_vel.y += (0 - self.ext_vel.y) * self.dt

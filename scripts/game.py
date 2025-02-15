@@ -1,9 +1,12 @@
-import pygame, random
+import pygame, random, math
+from pygame.math import Vector2 as vec2
 
 from scripts.terrain import generate_world_data
 from scripts.tile import Tile
 
 from scripts.entities.player import Player
+from scripts.entities.bullet import BulletManager
+from scripts.weapon.ranged import RangeWeapon
 from scripts.camera import Camera
 
 from scripts.utils import *
@@ -25,10 +28,12 @@ class Game:
 
         spawn_area = [pos for pos, tile in self.tiles.items() if tile.tile_type not in ('air', 'edge')]
         spawn_point = random.choice(spawn_area)
-        print(spawn_point, self.tiles[spawn_point].tile_type)
         self.player = Player(self.tile_size, spawn_point)
 
-        self.camera = Camera((self.WIDTH, self.HEIGHT))
+        self.weapon = RangeWeapon(self.tile_size)
+        self.bullet_manager = BulletManager(self.tile_size)
+
+        self.camera = Camera((self.WIDTH, self.HEIGHT), self.tile_size)
     
     def load(self):
         '''generate the world and tile it'''
@@ -42,8 +47,8 @@ class Game:
             terrain_type = world_data[pos]
 
             if terrain_type == 'dirt' or terrain_type == 'dirt2':
-
-                # if there is no tile (void) underneath current tile, make the current tile edge tile
+                
+                # if there is no tile (void | out of world) underneath current tile, make the current tile edge tile
                 if (pos[0], pos[1] + 1) not in world_data:
                     terrain_type = 'edge'
                 
@@ -60,11 +65,23 @@ class Game:
             self.window.blit(self.chunk_surfs[chunk_offset], [chunk_offset[0] * self.chunk_size[0] * self.tile_size - camera_offset[0], chunk_offset[1] * self.chunk_size[1] * self.tile_size - camera_offset[1]])
 
         self.player.draw(self.window, camera_offset)
+        self.bullet_manager.draw(self.window, camera_offset)
 
     def update(self, delta_time):
         self.dt = delta_time
+        mx, my = pygame.mouse.get_pos()
+        mbutton = pygame.mouse.get_pressed()
+                
+        camera_offset = self.camera.offset(self.player, self.dt, mx, my)
 
-        camera_offset = self.camera.offset(self.player, self.dt)
+        angle = math.degrees(math.atan2(my + camera_offset[1] - self.player.rect.centery, mx + camera_offset[0] - self.player.rect.centerx))
+
+        if mbutton[0]:
+            if self.weapon.shoot():
+                self.bullet_manager.add_bullet(self.player.rect.center, angle + random.randint(-4, 4))
+
+                self.player.ext_vel = vec2(-1, 0).rotate(angle).normalize() * 1
+                self.camera.start_shake(1)
         
         self.player.update(self.dt)
         player_offset = get_offset(self.player, self.tile_size)
@@ -74,6 +91,9 @@ class Game:
             if tile_offset in self.tiles:
                 collide_tiles.append(self.tiles[tile_offset])
         self.player.move(collide_tiles)
+
+        self.weapon.update(self.dt)
+        self.bullet_manager.update(self.dt)
 
         self.draw(camera_offset)
 
