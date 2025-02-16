@@ -29,11 +29,12 @@ class Camera:
         }
     
     def start_shake(self, intensity):
-        self.do_shake = True
-        self.shake_timer = self.shake_dur
+        if self.do_shake == False:
+            self.do_shake = True
+            self.shake_timer = self.shake_dur
 
-        self.shake_offset[0] = random.choice([-intensity, intensity])
-        self.shake_offset[1] = random.choice([-intensity, intensity])
+            self.shake_offset[0] = random.choice([-intensity, intensity])
+            self.shake_offset[1] = random.choice([-intensity, intensity])
 
     def shake(self):
         self.shake_timer -= self.dt

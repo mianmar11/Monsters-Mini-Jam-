@@ -1,3 +1,5 @@
+import random, pygame
+
 from scripts.entities.entity import Entity
 
 from scripts.utils import get_offset
@@ -6,24 +8,21 @@ class Enemy(Entity):
     def __init__(self, tile_size, pos):
         super().__init__(tile_size, pos)
         
-        self.image.fill('#dfd8cd')
-
-        self.flicker_timer = 0
+        self.image.fill('#e9e3d9')
 
         self.pursued = False
         self.purse_range = self.tile_size * 7
-        self.speed = 1.4
+        
+        self.speed = 0
+        self.dash_speed = 6
+        self.cooldown = 60
 
         self.health = 3
-    
-    def draw(self, draw_surf, camera_offset):
-        img = self.image.copy()
-        if self.flicker_timer > 0 and int(self.flicker_timer) % 5 == 0:
-            img.fill('red')
-        render_x = self.rect.x - camera_offset[0]
-        render_y = self.rect.y - camera_offset[1]
 
-        draw_surf.blit(img, (render_x, render_y))
+        self.process_timer = 24
+        self.flicker_timer = 0
+        self.dash_timer = 8
+        self.dash_cooldown_timer = random.randint(0, self.cooldown)
     
     def bullet_collision(self, bullets):
         for bullet in bullets:
@@ -40,30 +39,65 @@ class Enemy(Entity):
         distance = (dx**2 + dy**2)**0.5
 
         if distance < self.purse_range:
-            self.pursued = True
+            self.get_pursue()
+    
+    def get_pursue(self):
+        self.pursued = True
+        self.scale(0.5, 1.5)
     
     def chase(self, entity):
         dx = entity.x - self.rect.x
         dy = entity.y - self.rect.y
 
-        self.vel.x = dx
-        self.vel.y = dy
+        self.dash_timer -= self.dt
+        if self.dash_timer < 0:
+            self.dash_cooldown_timer -= self.dt
+            if self.dash_cooldown_timer < 0:
+                angle = random.randint(1, 45)
+                self.vel.x = dx
+                self.vel.y = dy
+                self.vel = self.vel.rotate(random.choice([0, angle, -angle]))
+                self.dash_cooldown_timer = self.cooldown
+                self.dash_timer = 6
+                self.scale(0.6, 1.4)
+                return
+
+    def move(self, tiles):
+        if self.vel.length() > 0:
+            self.vel = self.vel.normalize()
+
+        if self.dash_timer > 0:
+            self.speed += (self.dash_speed - self.speed) * self.dt
+        else:
+            self.speed += (0 - self.speed) * 0.5 * self.dt
+        self.total_vel = self.vel * self.speed + self.ext_vel
+
+        self.y += self.total_vel.y * self.dt
+        self.rect.y = self.y
+        self.vertical_collision(tiles)
+        self.rect.y = self.y
+
+        self.x += self.total_vel.x * self.dt
+        self.rect.x = self.x
+        self.horizontal_collision(tiles)
+        self.rect.x = self.x
 
     def update(self, delta_time, player):
         super().update(delta_time)
 
-        self.pursue_target(player)
-        if self.pursued:
-            self.chase(player)
-
-        if self.flicker_timer > 0:
-            self.flicker_timer -= self.dt
+        if self.pursued == False:
+            self.pursue_target(player)
+        else:
+            self.process_timer -= self.dt
+            if self.process_timer < 0:
+                self.chase(player)
 
 
 class EnemyManager:
     def __init__(self, tile_size):
         self.tile_size = tile_size
         self.enemies = []
+        self.pursued = False
 
     def spawn(self, pos):
         self.enemies.append(Enemy(self.tile_size, pos))
@@ -86,4 +120,9 @@ class EnemyManager:
                     collide_tiles.append(tiles[tile_offset]) if tiles[tile_offset].tile_type not in ['air', 'edge'] else None
             
             enemy.move(collide_tiles)
+
+            # make all the enemies pursued
+            if enemy.pursued:
+                self.pursued = True
+            enemy.pursued = True if self.pursued else False
 

@@ -31,20 +31,22 @@ class Game:
         self.tiles = self.chunking(self.tiles)
 
         spawn_area =  [pos for pos, tile in self.ground_tiles.items() if tile.tile_type not in ('air', 'edge')]
-        spawn_area = [pos for pos in spawn_area if self.tiles[pos].tile_type in ('air', 'edge')]
-        spawn_area = [pos for pos in spawn_area if ((pos[0] - self.WORLD_MAP_SIZE[0]//2)**2 + (pos[1] - self.WORLD_MAP_SIZE[1]//2)**2)**0.5 < self.WORLD_MAP_SIZE[1]/3]
-        spawn_point = random.choice(spawn_area)
+        self.spawn_area = [pos for pos in spawn_area if self.tiles[pos].tile_type in ('air', 'edge')]
+        spawn_point = random.choice([pos for pos in self.spawn_area if ((pos[0] - self.WORLD_MAP_SIZE[0]//2)**2 + (pos[1] - self.WORLD_MAP_SIZE[1]//2)**2)**0.5 < self.WORLD_MAP_SIZE[1]/3])
         self.player = Player(self.tile_size, spawn_point)
 
         self.enemy_manager = EnemyManager(self.tile_size)
-        for i in range(10):
-            self.enemy_manager.spawn(random.choice(spawn_area))
+        self.spawn_enemies(10)
 
         self.weapon = RangeWeapon(self.tile_size)
         self.bullet_manager = BulletManager(self.tile_size)
 
         self.camera = Camera((self.WIDTH, self.HEIGHT), self.tile_size)
     
+    def spawn_enemies(self, amount):
+        for i in range(amount):
+            self.enemy_manager.spawn(random.choice(self.spawn_area))
+
     def chunking(self, tiles):
         tiles = tiles.copy()
         for pos in tiles:
@@ -104,19 +106,32 @@ class Game:
     def entity_bullet_collision(self):
         for entity in self.enemy_manager.enemies:
             for bullet in self.bullet_manager.bullets:
+
                 if entity.rect.colliderect(bullet.rect):
+                    
+                    if entity.deduct_health():
+                        self.camera.start_shake(4)
+                        entity.ext_vel = vec2(1, 0).rotate(bullet.angle).normalize() * 4 # knockback
+                        entity.get_pursue()
 
-                    entity.health -= bullet.damage
-                    entity.ext_vel = vec2(1, 0).rotate(bullet.angle).normalize() * 4 # knockback
-                    entity.flicker_timer = 20
-                    entity.pursued = True
+                        if entity.health <= 0:
+                            self.enemy_manager.enemies.remove(entity)
 
-                    if entity.health <= 0:
-                        self.enemy_manager.enemies.remove(entity)
-                    self.bullet_manager.bullets.remove(bullet)
+                        bullet.piercing -= 1
+                        if bullet.piercing <= 0:
+                            self.bullet_manager.bullets.remove(bullet)
+                            break
 
-                    self.camera.start_shake(4)
-                    break
+            if entity.rect.colliderect(self.player.rect):
+                if self.player.deduct_health():
+                    self.camera.start_shake(6)
+                            
+                    dx = entity.rect.centerx - self.player.rect.centerx
+                    dy = entity.rect.centery - self.player.rect.centery
+
+                    angle = math.degrees(math.atan2(dy, dx))
+
+                    self.player.ext_vel = vec2(-1, 0).rotate(angle).normalize() * self.tile_size
 
     def update(self, delta_time):
         self.dt = delta_time

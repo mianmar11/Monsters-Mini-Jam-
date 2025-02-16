@@ -14,6 +14,11 @@ class Bullet:
         pygame.draw.rect(self.image, 'yellow', (0, 0, self.tile_size, self.tile_size/2))
         pygame.draw.rect(self.image, 'white', (1, 1, self.tile_size - 2, self.tile_size/2 - 2))
 
+        self.shadow = pygame.mask.from_surface(self.image)
+        self.shadow = self.shadow.to_surface(setcolor=(255, 255, 255, 255), unsetcolor=(0, 0, 0, 0))
+        self.shadow.fill((0, 0, 0))
+        self.shadow.set_alpha(48)
+
         self.x, self.y = pos[0] + self.tile_size * math.cos(math.radians(self.angle)), pos[1] + self.tile_size * math.sin(math.radians(self.angle))
         self.rect = pygame.Rect((0, 0), (self.hitbox[2], self.hitbox[3]))
         self.rect.center = (self.x, self.y)
@@ -29,6 +34,8 @@ class Bullet:
 
         self.destruction_timer = 1000
 
+        self.piercing = 1
+
         self.damage = 1
 
     def draw(self, draw_surf, camera_offset):
@@ -40,6 +47,9 @@ class Bullet:
         render_x = self.rect.x - camera_offset[0] - (img.get_width() - self.hitbox[2]) / 2
         render_y = self.rect.y - camera_offset[1] - (img.get_height() - self.hitbox[3]) / 2
         
+        shadow_img = pygame.transform.rotate(self.shadow, -self.angle)
+
+        draw_surf.blit(shadow_img, (render_x, render_y + self.shadow.get_height()))
         draw_surf.blit(img, (render_x, render_y))
         # pygame.draw.polygon(draw_surf, 'red', [(self.rect.x - camera_offset[0], self.rect.y - camera_offset[1]), (self.rect.x - camera_offset[0] + self.hitbox[2], self.rect.y - camera_offset[1]), (self.rect.x - camera_offset[0] + self.hitbox[2], self.rect.y - camera_offset[1] + self.hitbox[3]), (self.rect.x - camera_offset[0], self.rect.y - camera_offset[1] + self.hitbox[3])], 1)
         # pygame.draw.rect(draw_surf, 'red', (self.rect.x - camera_offset[0], self.rect.y - camera_offset[1], self.hitbox[2], self.hitbox[3]), 1)
