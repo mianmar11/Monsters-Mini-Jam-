@@ -2,7 +2,7 @@ class RangeWeapon:
     def __init__(self, tile_size):
         self.tile_size = tile_size
 
-        self.cooldown = 8
+        self.cooldown = 12
         self.cooldown_timer = 0
     
     def shoot(self):

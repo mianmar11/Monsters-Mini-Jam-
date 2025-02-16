@@ -24,14 +24,16 @@ class Bullet:
 
         self.flash = pygame.Surface((self.tile_size, self.tile_size)).convert_alpha()
         self.flash.fill('white')
+        self.flash = pygame.transform.rotate(self.flash, random.randint(0, 45))
         self.flash_timer = 0.8
 
         self.destruction_timer = 1000
 
+        self.damage = 1
+
     def draw(self, draw_surf, camera_offset):
         if self.flash_timer > 0:
             img = self.flash
-            img = pygame.transform.rotozoom(img, random.randint(0, 360), 1)
         else:
             img = self.image 
             img = pygame.transform.rotozoom(img, -self.angle, 1)
@@ -50,7 +52,7 @@ class Bullet:
         return False
 
     def destroy(self):
-        self.destruction_timer -= 1
+        self.destruction_timer -= self.dt
         if self.destruction_timer <= 0:
             return True
         return False
@@ -86,6 +88,7 @@ class BulletManager:
         for bullet in self.bullets:
             bullet.update(self.dt)
 
-            if bullet.destroy() or bullet.collision(tiles.get(get_offset(bullet, self.tile_size), None)):
+            destroy = bullet.destroy()
+            collided = bullet.collision(tiles.get(get_offset(bullet, self.tile_size), None))
+            if destroy or collided:
                 self.bullets.remove(bullet)
-                

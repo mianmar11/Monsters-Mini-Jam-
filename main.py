@@ -50,7 +50,7 @@ class App:
  
             py.display.flip()
             if py.key.get_pressed()[py.K_UP]:
-                self.dt_setting = 10
+                self.dt_setting = 5
             if py.key.get_pressed()[py.K_DOWN]:
                 self.dt_setting = 60
     
