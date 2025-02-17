@@ -97,7 +97,8 @@ class Player(Entity):
             img.fill('red')
         
         img = pygame.transform.rotate(img, self.angle)
-        shadow_img = pygame.transform.rotate(self.shadow.copy(), self.angle)
+        shadow_img = self.shadow.copy()
+        # shadow_img = pygame.transform.rotate(self.shadow.copy(), self.angle)
 
         render_x = self.rect.x - camera_offset[0] - (img.get_width() - self.image.get_width()) / 2
         render_y = self.rect.y - camera_offset[1] - (img.get_width() - self.image.get_height()) / 2

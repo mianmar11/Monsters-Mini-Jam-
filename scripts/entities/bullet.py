@@ -84,6 +84,7 @@ class BulletManager:
         self.tile_size = tile_size
 
         self.bullets = []
+        self.damage = 1
 
     def add_bullet(self, pos, angle):
         self.bullets.append(Bullet(self.tile_size, pos, angle))

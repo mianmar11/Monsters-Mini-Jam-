@@ -21,6 +21,7 @@ class App:
         self.fps_event = py.USEREVENT
         self.fps = '0'
         py.time.set_timer(self.fps_event, 250)
+        py.display.set_caption('1 Blast')
 
     def run(self):
         while self.running:
@@ -45,8 +46,8 @@ class App:
             self.window.fill((30, 30, 30))
             self.game.update(dt)
             
-            fps = self.font.render(f'FPS: {self.fps}', True, 'white')
-            self.window.blit(fps, (10, 10))
+            # fps = self.font.render(f'FPS: {self.fps}', True, 'white')
+            # self.window.blit(fps, (10, 10))
  
             py.display.flip()
             if py.key.get_pressed()[py.K_UP]:

@@ -10,38 +10,47 @@ from scripts.entities.enemy import EnemyManager
 from scripts.weapon.ranged import RangeWeapon
 from scripts.camera import Camera
 
+from scripts.text import TextManager
 from scripts.utils import *
 
 class Game:
     def __init__(self, window):
         self.window = window
         self.WIDTH, self.HEIGHT = self.window.get_size()
+        self.chunk_size = [14, 12]
+        self.WORLD_MAP_SIZE = [self.WIDTH//16 * 5, self.HEIGHT//16 * 5]
+        self.fade = self.window.copy()
 
         self.tile_size = 16
+
+        self.text_manager = TextManager(self.tile_size, (self.WIDTH, self.HEIGHT))
+        self.camera = Camera((self.WIDTH, self.HEIGHT), self.tile_size)
+
+        self.chunk_surfs = {} # cached tiles on chunk surfaces only used for rendering
         self.ground_tiles = {}
         self.tiles = {}
-        
-        self.chunk_size = [14, 12]
-        self.chunk_surfs = {} # cached tiles on chunk surfaces only used for rendering
-
-        self.WORLD_MAP_SIZE = [self.WIDTH//16 * 5, self.HEIGHT//16 * 5]
 
         self.load()
-        self.ground_tiles = self.chunking(self.ground_tiles)
-        self.tiles = self.chunking(self.tiles)
 
         spawn_area =  [pos for pos, tile in self.ground_tiles.items() if tile.tile_type not in ('air', 'edge')]
         self.spawn_area = [pos for pos in spawn_area if self.tiles[pos].tile_type in ('air', 'edge')]
         spawn_point = random.choice([pos for pos in self.spawn_area if ((pos[0] - self.WORLD_MAP_SIZE[0]//2)**2 + (pos[1] - self.WORLD_MAP_SIZE[1]//2)**2)**0.5 < self.WORLD_MAP_SIZE[1]/3])
         self.player = Player(self.tile_size, spawn_point)
 
+        self.game_started = False
+        self.lost = False
+        self.upgraded = False
+        self.wave = 1
         self.enemy_manager = EnemyManager(self.tile_size)
-        self.spawn_enemies(10)
+        self.enemy_spawn_rate = 10
+        self.spawn_enemies(self.enemy_spawn_rate)
 
         self.weapon = RangeWeapon(self.tile_size)
         self.bullet_manager = BulletManager(self.tile_size)
 
-        self.camera = Camera((self.WIDTH, self.HEIGHT), self.tile_size)
+        self.radius = 0
+        self.fade_in = False
+        self.text_manager.queue_text(f"Wave {self.wave}", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2)})
     
     def spawn_enemies(self, amount):
         for i in range(amount):
@@ -56,7 +65,32 @@ class Game:
             
             tiles[pos].draw(self.chunk_surfs[chunk_offset], [chunk_offset[0] * self.chunk_size[0] * self.tile_size, chunk_offset[1] * self.chunk_size[1] * self.tile_size])
 
-        return tiles
+    def restart(self):
+        self.chunk_surfs = {} # cached tiles on chunk surfaces only used for rendering
+        self.ground_tiles = {}
+        self.tiles = {}
+
+        self.load()
+
+        spawn_area =  [pos for pos, tile in self.ground_tiles.items() if tile.tile_type not in ('air', 'edge')]
+        self.spawn_area = [pos for pos in spawn_area if self.tiles[pos].tile_type in ('air', 'edge')]
+        spawn_point = random.choice([pos for pos in self.spawn_area if ((pos[0] - self.WORLD_MAP_SIZE[0]//2)**2 + (pos[1] - self.WORLD_MAP_SIZE[1]//2)**2)**0.5 < self.WORLD_MAP_SIZE[1]/3])
+        self.player = Player(self.tile_size, spawn_point)
+
+        self.game_started = False
+        self.lost = False
+        self.upgraded = False
+        self.wave = 1
+        self.enemy_manager = EnemyManager(self.tile_size)
+        self.enemy_spawn_rate = 10
+        self.spawn_enemies(self.enemy_spawn_rate)
+
+        self.weapon = RangeWeapon(self.tile_size)
+        self.bullet_manager = BulletManager(self.tile_size)
+
+        self.radius = 0
+        self.fade_in = False
+        self.text_manager.queue_text(f"Wave {self.wave}", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2)})
 
     def load(self):
         seed = random.randint(0, 256)
@@ -93,6 +127,9 @@ class Game:
             
         self.ground_tiles = auto_tile(self.ground_tiles, self.tile_size)
         self.tiles = auto_tile(self.tiles, self.tile_size)
+        
+        self.chunking(self.ground_tiles)
+        self.chunking(self.tiles)
 
     def draw(self, camera_offset):
         for chunk_offset in self.chunk_surfs:
@@ -103,13 +140,26 @@ class Game:
         self.player.draw(self.window, camera_offset)
         self.bullet_manager.draw(self.window, camera_offset)
 
+        # render player health
+        for i in range(self.player.health):
+            pygame.draw.rect(self.window, 'red', (10 + i * self.tile_size, 10, self.tile_size/1.5, self.tile_size/1.5))
+            pygame.draw.rect(self.window, 'white', (10 + i * self.tile_size, 10, self.tile_size/1.5, self.tile_size/1.5), 1)
+
+    def minimap(self):
+        pygame.draw.rect(self.window, (0, 0, 0), (self.WIDTH - self.WORLD_MAP_SIZE[0], 0, self.WORLD_MAP_SIZE[0], self.WORLD_MAP_SIZE[1]), 1)
+        for entity in self.enemy_manager.enemies:
+            enemy_offset = get_offset(entity, self.tile_size)
+            pygame.draw.rect(self.window, 'white', (enemy_offset[0] + self.WIDTH - self.WORLD_MAP_SIZE[0], enemy_offset[1], 2, 2))
+        player_offset = get_offset(self.player, self.tile_size)
+        pygame.draw.rect(self.window, 'blue', (player_offset[0] + self.WIDTH - self.WORLD_MAP_SIZE[0], player_offset[1], 2, 2))
+
     def entity_bullet_collision(self):
         for entity in self.enemy_manager.enemies:
             for bullet in self.bullet_manager.bullets:
 
                 if entity.rect.colliderect(bullet.rect):
                     
-                    if entity.deduct_health():
+                    if entity.deduct_health(bullet.damage):
                         self.camera.start_shake(4)
                         entity.ext_vel = vec2(1, 0).rotate(bullet.angle).normalize() * 4 # knockback
                         entity.get_pursue()
@@ -123,7 +173,7 @@ class Game:
                             break
 
             if entity.rect.colliderect(self.player.rect):
-                if self.player.deduct_health():
+                if self.player.deduct_health(entity.damage):
                     self.camera.start_shake(6)
                             
                     dx = entity.rect.centerx - self.player.rect.centerx
@@ -133,40 +183,140 @@ class Game:
 
                     self.player.ext_vel = vec2(-1, 0).rotate(angle).normalize() * self.tile_size
 
+                    self.game_state()
+
+    def game_state(self):
+        if self.player.health <= 0:
+            self.lost = True
+            self.fade_in = True
+
+    def upgrade(self):
+        if len(self.enemy_manager.enemies) <= 0:
+            chance = random.randint(0, 2)
+            if self.wave % 4 == 0 and self.upgraded == False:
+                if chance == 1:
+                    if self.bullet_manager.damage < 6:
+                        self.bullet_manager.damage += 0.5
+                        'Bullets deal more damage'
+                        self.text_manager.queue_text("Bullets Damage: +0.5", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 + self.tile_size/2)}, 180)
+                elif chance == 2:
+                    if self.weapon.cooldown > 4:
+                        self.weapon.cooldown -= 1
+                        'Reduced weapon cooldown'
+                        self.text_manager.queue_text("Weapon Cooldown: -1", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 + self.tile_size/2)}, 180)
+                else:
+                    if self.player.health < 10:
+                        self.player.health += 1
+                        "Buffed player health"
+                        self.text_manager.queue_text("Player Health: +1", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 + self.tile_size/2)}, 180)
+
+            # not limiting the enemy buffs to make the game harder and challenging overtime
+            if self.wave % 2 == 0 and self.upgraded == False:
+                if chance == 1:
+                    self.enemy_manager.damages.append(self.enemy_manager.damages[-1]+1) # add one damage
+                    'enemy deals more damage'
+                    self.text_manager.queue_text("Buffed monster attack damage", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 - self.tile_size/2)}, 180)
+                elif chance == 2:
+                    self.enemy_manager.dash_speed.append(self.enemy_manager.dash_speed[-1]+1)
+                    'enemy speed buffed'
+                    self.text_manager.queue_text("Buffed monster speed", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 - self.tile_size/2)}, 180)
+                else:
+                    self.enemy_manager.healths.append(self.enemy_manager.healths[-1]+1)
+                    'enemy health buffed'
+                    self.text_manager.queue_text("Buffed monster health", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 - self.tile_size/2)}, 180)
+                
+                self.upgraded = True
+
+    def spawn_wave(self):
+        if len(self.enemy_manager.enemies) <= 0:
+            if self.enemy_manager.can_spawn():
+                self.enemy_spawn_rate = random.randint(5, 10) + self.enemy_spawn_rate
+                self.spawn_enemies(self.enemy_spawn_rate)
+                self.enemy_manager.spawn_cooldown_timer = self.enemy_manager.spawn_cooldown
+                self.wave += 1
+                self.upgraded = False
+                self.text_manager.queue_text(f"Wave {self.wave}", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2)})
+
+    def shoot(self, mx, my, mbutton, camera_offset):
+        angle = math.degrees(math.atan2(my + camera_offset[1] - self.player.rect.centery, mx + camera_offset[0] - self.player.rect.centerx))
+        if mbutton[0]:
+            if self.weapon.shoot():
+                self.bullet_manager.add_bullet(self.player.rect.center, angle + random.randint(-3, 3))
+
+                self.player.ext_vel = vec2(-1, 0).rotate(angle).normalize() * 1 # knockback
+                if abs(self.player.ext_vel.x) > abs(self.player.ext_vel.y):
+                    self.player.scale(0.8, 1)
+                else:
+                    self.player.scale(1, 0.8)
+
     def update(self, delta_time):
         self.dt = delta_time
         mx, my = pygame.mouse.get_pos()
         mbutton = pygame.mouse.get_pressed()
                 
         camera_offset = self.camera.offset(self.player, self.dt, mx, my)
-
-        angle = math.degrees(math.atan2(my + camera_offset[1] - self.player.rect.centery, mx + camera_offset[0] - self.player.rect.centerx))
-
-        if mbutton[0]:
-            if self.weapon.shoot():
-                self.bullet_manager.add_bullet(self.player.rect.center, angle + random.randint(-3, 3))
-
-                self.player.ext_vel = vec2(-1, 0).rotate(angle).normalize() * 1 # knockback
-        
         self.player.update(self.dt)
-        player_offset = get_offset(self.player, self.tile_size)
-        collide_tiles = []
-        for offset in [(-1, 0), (0, -1), (1, 0), (0, 1), (-1, -1), (1, -1), (-1, 1), (1, 1)]:
-            tile_offset = (player_offset[0] + offset[0], player_offset[1] + offset[1])
-            if tile_offset in self.ground_tiles:
-                collide_tiles.append(self.ground_tiles[tile_offset]) if self.ground_tiles[tile_offset].tile_type in ['air', 'edge'] else None
-            if tile_offset in self.tiles:
-                collide_tiles.append(self.tiles[tile_offset]) if self.tiles[tile_offset].tile_type not in ['air', 'edge'] else None
-        self.player.move(collide_tiles)
+        
+        if self.game_started and self.lost == False:
+            self.shoot(mx, my, mbutton, camera_offset)
 
-        self.enemy_manager.update(self.dt, self.player, self.ground_tiles, self.tiles)
+            # make all the enemies chase as soon as player moves or shoots
+            if len(self.bullet_manager.bullets) > 0 or self.player.rect.topleft != self.player.ori_pos:
+                self.enemy_manager.pursued = True
 
-        self.weapon.update(self.dt)
-        self.bullet_manager.update(self.dt, self.tiles)
+            player_offset = get_offset(self.player, self.tile_size)
+            collide_tiles = []
+            for offset in [(-1, 0), (0, -1), (1, 0), (0, 1), (-1, -1), (1, -1), (-1, 1), (1, 1)]:
+                tile_offset = (player_offset[0] + offset[0], player_offset[1] + offset[1])
+                if tile_offset in self.ground_tiles:
+                    collide_tiles.append(self.ground_tiles[tile_offset]) if self.ground_tiles[tile_offset].tile_type in ['air', 'edge'] else None
+                if tile_offset in self.tiles:
+                    collide_tiles.append(self.tiles[tile_offset]) if self.tiles[tile_offset].tile_type not in ['air', 'edge'] else None
+            self.player.move(collide_tiles)
 
-        self.entity_bullet_collision()
+            self.enemy_manager.update(self.dt, self.player, self.ground_tiles, self.tiles)
+            self.weapon.update(self.dt)
+            self.bullet_manager.update(self.dt, self.tiles)
+            self.entity_bullet_collision()
+
+            self.upgrade()
+            self.spawn_wave()
 
         self.draw(camera_offset)
+        self.minimap()
+        
+        # UI 
+        # will only run once at the start of the program
+        if self.game_started == False:
+            if self.radius < self.WIDTH/2 + self.tile_size * 5:
+                self.radius += 10 * self.dt
+            else:
+                self.game_started = True
+
+        if self.lost:
+            # fade in 
+            if self.fade_in:
+                if self.radius > 0:
+                    self.radius -= 10 * self.dt
+                else:
+                    self.text_manager.queue_text("You Died", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 - self.tile_size)}, None)
+                    self.text_manager.queue_text("Press R to restart", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 + self.tile_size)}, None)
+                    self.text_manager.queue_text("Thank you for playing!", self.text_manager.SMALL_FONT, {'center': (self.WIDTH/2, self.HEIGHT - self.tile_size)}, None)
+
+            # fade out
+            else:
+                if self.radius < self.WIDTH/2 + self.tile_size * 5:
+                    self.radius += 10 * self.dt
+                else:
+                    self.lost = False
+
+        if self.game_started == False or self.lost:      
+            self.fade.fill((0, 0, 0))
+            self.fade.set_colorkey((255, 255, 255))
+            pygame.draw.circle(self.fade, (255, 255, 255), (self.WIDTH/2, self.HEIGHT/2), self.radius)
+            self.window.blit(self.fade, (0, 0))
+
+        self.text_manager.draw(self.window, self.dt)
 
     def event_controls(self, event):
         if event.type == pygame.KEYUP:
@@ -174,3 +324,8 @@ class Game:
 
         if event.type == pygame.KEYDOWN:
             self.player.keydown(event.key)
+            if self.text_manager.need_input:
+                if event.key == pygame.K_r:
+                    self.fade_in = False
+                    self.text_manager.render_queue.clear()
+                    self.restart()

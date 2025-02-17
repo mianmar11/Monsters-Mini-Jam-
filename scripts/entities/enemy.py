@@ -5,7 +5,7 @@ from scripts.entities.entity import Entity
 from scripts.utils import get_offset
 
 class Enemy(Entity):
-    def __init__(self, tile_size, pos):
+    def __init__(self, tile_size, pos, damage=1, health=3, dash_speed=6):
         super().__init__(tile_size, pos)
         
         self.image.fill('#e9e3d9')
@@ -14,10 +14,11 @@ class Enemy(Entity):
         self.purse_range = self.tile_size * 7
         
         self.speed = 0
-        self.dash_speed = 6
+        self.dash_speed = dash_speed
         self.cooldown = 60
 
-        self.health = 3
+        self.health = health
+        self.damage = damage
 
         self.process_timer = 24
         self.flicker_timer = 0
@@ -97,16 +98,29 @@ class EnemyManager:
     def __init__(self, tile_size):
         self.tile_size = tile_size
         self.enemies = []
+        self.damages = [1]
+        self.healths = [3]
+        self.dash_speed = [6]
         self.pursued = False
 
+        self.spawn_cooldown = 180
+        self.spawn_cooldown_timer = 180
+
+    def can_spawn(self):
+        self.spawn_cooldown_timer -= self.dt
+        if self.spawn_cooldown_timer < 0:
+            return True
+        return
+
     def spawn(self, pos):
-        self.enemies.append(Enemy(self.tile_size, pos))
+        self.enemies.append(Enemy(self.tile_size, pos, random.choice(self.damages), random.choice(self.healths), random.choice(self.dash_speed)))
     
     def draw(self, draw_surf, camera_offset):
         for enemy in self.enemies:
             enemy.draw(draw_surf, camera_offset)
 
     def update(self, delta_time, player, ground_tiles, tiles):
+        self.dt = delta_time
         for enemy in self.enemies:
             enemy.update(delta_time, player)
 
@@ -124,5 +138,6 @@ class EnemyManager:
             # make all the enemies pursued
             if enemy.pursued:
                 self.pursued = True
-            enemy.pursued = True if self.pursued else False
+            if self.pursued and enemy.pursued == False:
+                enemy.get_pursue()
 
