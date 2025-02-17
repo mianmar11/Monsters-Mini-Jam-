@@ -8,10 +8,14 @@ from scripts.entities.player import Player
 from scripts.entities.bullet import BulletManager
 from scripts.entities.enemy import EnemyManager
 from scripts.weapon.ranged import RangeWeapon
+from scripts.shockwave import Shockwave
 from scripts.camera import Camera
+from scripts.particle import Particle
+from scripts.cursor import Cursor
 
 from scripts.text import TextManager
 from scripts.utils import *
+from scripts.sfx import SFX
 
 class Game:
     def __init__(self, window):
@@ -23,8 +27,15 @@ class Game:
 
         self.tile_size = 16
 
+        self.cursor = Cursor(self.tile_size)
         self.text_manager = TextManager(self.tile_size, (self.WIDTH, self.HEIGHT))
         self.camera = Camera((self.WIDTH, self.HEIGHT), self.tile_size)
+        
+        self.shockwaves = []
+        self.particles = []
+
+        self.sfx = SFX()
+        self.sfx.play('music', loop=-1)
 
         self.chunk_surfs = {} # cached tiles on chunk surfaces only used for rendering
         self.ground_tiles = {}
@@ -140,6 +151,16 @@ class Game:
         self.player.draw(self.window, camera_offset)
         self.bullet_manager.draw(self.window, camera_offset)
 
+        for shockwave in self.shockwaves.copy():
+            shockwave.draw(self.window, camera_offset)
+            if shockwave.update(self.dt):
+                self.shockwaves.remove(shockwave)
+        
+        for particle in self.particles.copy():
+            particle.draw(self.window, camera_offset)
+            if particle.update(self.dt):
+                self.particles.remove(particle)
+
         # render player health
         for i in range(self.player.health):
             pygame.draw.rect(self.window, 'red', (10 + i * self.tile_size, 10, self.tile_size/1.5, self.tile_size/1.5))
@@ -161,10 +182,14 @@ class Game:
                     
                     if entity.deduct_health(bullet.damage):
                         self.camera.start_shake(4)
+                        self.sfx.play("hit")
+                        self.particles += [Particle((entity.rect.centerx + random.randint(8, 10), entity.rect.centery + random.randint(8, 10)), bullet.angle + random.randint(10, 30) * random.choice([-1, 1]), self.tile_size) for i in range(random.randint(1, 4))]
+
                         entity.ext_vel = vec2(1, 0).rotate(bullet.angle).normalize() * 4 # knockback
                         entity.get_pursue()
 
                         if entity.health <= 0:
+                            self.shockwaves.append(Shockwave(entity.rect.center, self.tile_size))
                             self.enemy_manager.enemies.remove(entity)
 
                         bullet.piercing -= 1
@@ -175,6 +200,7 @@ class Game:
             if entity.rect.colliderect(self.player.rect):
                 if self.player.deduct_health(entity.damage):
                     self.camera.start_shake(6)
+                    self.sfx.play("hit")
                             
                     dx = entity.rect.centerx - self.player.rect.centerx
                     dy = entity.rect.centery - self.player.rect.centery
@@ -185,10 +211,19 @@ class Game:
 
                     self.game_state()
 
+    def tile_bullet_collision(self):
+        for bullet in self.bullet_manager.bullets:
+            destroy = bullet.destroy()
+            collided = bullet.collision(self.tiles.get(get_offset(bullet, self.tile_size), None))
+            if destroy or collided:
+                self.particles += [Particle((bullet.rect.centerx + random.randint(8, 10), bullet.rect.centery + random.randint(8, 10)), bullet.angle + random.randint(10, 30) * random.choice([-1, 1]), self.tile_size) for i in range(random.randint(1, 4))]
+                self.bullet_manager.bullets.remove(bullet)
+
     def game_state(self):
         if self.player.health <= 0:
             self.lost = True
             self.fade_in = True
+            self.shockwaves.append(Shockwave(self.player.rect.center, self.tile_size))
 
     def upgrade(self):
         if len(self.enemy_manager.enemies) <= 0:
@@ -241,6 +276,7 @@ class Game:
         angle = math.degrees(math.atan2(my + camera_offset[1] - self.player.rect.centery, mx + camera_offset[0] - self.player.rect.centerx))
         if mbutton[0]:
             if self.weapon.shoot():
+                self.sfx.play('shoot')
                 self.bullet_manager.add_bullet(self.player.rect.center, angle + random.randint(-3, 3))
 
                 self.player.ext_vel = vec2(-1, 0).rotate(angle).normalize() * 1 # knockback
@@ -276,7 +312,8 @@ class Game:
 
             self.enemy_manager.update(self.dt, self.player, self.ground_tiles, self.tiles)
             self.weapon.update(self.dt)
-            self.bullet_manager.update(self.dt, self.tiles)
+            self.bullet_manager.update(self.dt)
+            self.tile_bullet_collision()
             self.entity_bullet_collision()
 
             self.upgrade()
@@ -284,6 +321,7 @@ class Game:
 
         self.draw(camera_offset)
         self.minimap()
+        self.cursor.update(self.dt, self.window, (mx, my))
         
         # UI 
         # will only run once at the start of the program

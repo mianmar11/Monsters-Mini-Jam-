@@ -93,13 +93,8 @@ class BulletManager:
         for bullet in self.bullets:
             bullet.draw(draw_surf, camera_offset)
 
-    def update(self, delta_time, tiles):
+    def update(self, delta_time):
         self.dt = delta_time
 
         for bullet in self.bullets:
             bullet.update(self.dt)
-
-            destroy = bullet.destroy()
-            collided = bullet.collision(tiles.get(get_offset(bullet, self.tile_size), None))
-            if destroy or collided:
-                self.bullets.remove(bullet)
