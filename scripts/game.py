@@ -1,27 +1,27 @@
 import pygame, random, math
 from pygame.math import Vector2 as vec2
 
-from scripts.terrain import generate_world_data
-from scripts.tile import Tile, auto_tile
+from scripts.tiling.terrain import generate_world_data
+from scripts.tiling.tile import Tile, auto_tile
 
 from scripts.entities.player import Player
-from scripts.entities.bullet import BulletManager
+from scripts.weapon.bullet import BulletManager
 from scripts.entities.enemy import EnemyManager
 from scripts.weapon.ranged import RangeWeapon
-from scripts.shockwave import Shockwave
-from scripts.camera import Camera
-from scripts.particle import Particle
-from scripts.cursor import Cursor
+from scripts.effects.shockwave import Shockwave
+from scripts.utilities.camera import Camera
+from scripts.effects.particle import Particle
+from scripts.utilities.cursor import Cursor
 
-from scripts.text import TextManager
-from scripts.utils import *
-from scripts.sfx import SFX
+from scripts.utilities.text import TextManager
+from scripts.utilities.utils import *
+from scripts.utilities.sfx import SFX
 
 class Game:
     def __init__(self, window):
         self.window = window
         self.WIDTH, self.HEIGHT = self.window.get_size()
-        self.chunk_size = [14, 12]
+        self.chunk_size = [32, 18]
         self.WORLD_MAP_SIZE = [self.WIDTH//16 * 5, self.HEIGHT//16 * 5]
         self.fade = self.window.copy()
 
@@ -30,12 +30,12 @@ class Game:
         self.cursor = Cursor(self.tile_size)
         self.text_manager = TextManager(self.tile_size, (self.WIDTH, self.HEIGHT))
         self.camera = Camera((self.WIDTH, self.HEIGHT), self.tile_size)
-        
-        self.shockwaves = []
-        self.particles = []
 
         self.sfx = SFX()
         self.sfx.play('music', loop=-1)
+        
+        self.shockwaves = []
+        self.particles = []
 
         self.chunk_surfs = {} # cached tiles on chunk surfaces only used for rendering
         self.ground_tiles = {}
@@ -143,7 +143,13 @@ class Game:
         self.chunking(self.tiles)
 
     def draw(self, camera_offset):
-        for chunk_offset in self.chunk_surfs:
+        player_chunk_offset = get_offset(self.player, (self.chunk_size[0] * self.tile_size, self.chunk_size[1] * self.tile_size))
+        neighbor_offsets = [(-1, -1), (0, -1), (1, -1),
+                            (-1, 0), (0, 0), (1, 0),
+                            (-1, 1), (0, 1), (1, 1)]
+
+        for offset in neighbor_offsets:
+            chunk_offset = (player_chunk_offset[0] + offset[0], player_chunk_offset[1] + offset[1])
             # print(i[0] * self.chunk_size[0] * self.tile_size, i[1] * self.chunk_size[1] * self.tile_size)
             self.window.blit(self.chunk_surfs[chunk_offset], [chunk_offset[0] * self.chunk_size[0] * self.tile_size - camera_offset[0], chunk_offset[1] * self.chunk_size[1] * self.tile_size - camera_offset[1]])
 
@@ -169,17 +175,17 @@ class Game:
     def minimap(self):
         pygame.draw.rect(self.window, (0, 0, 0), (self.WIDTH - self.WORLD_MAP_SIZE[0], 0, self.WORLD_MAP_SIZE[0], self.WORLD_MAP_SIZE[1]), 1)
         for entity in self.enemy_manager.enemies:
-            enemy_offset = get_offset(entity, self.tile_size)
+            enemy_offset = get_offset(entity, [self.tile_size]*2)
             pygame.draw.rect(self.window, 'white', (enemy_offset[0] + self.WIDTH - self.WORLD_MAP_SIZE[0], enemy_offset[1], 2, 2))
-        player_offset = get_offset(self.player, self.tile_size)
+        player_offset = get_offset(self.player, [self.tile_size]*2)
         pygame.draw.rect(self.window, 'blue', (player_offset[0] + self.WIDTH - self.WORLD_MAP_SIZE[0], player_offset[1], 2, 2))
 
-    def entity_bullet_collision(self):
+    def entities_collisions(self):
         for entity in self.enemy_manager.enemies:
             for bullet in self.bullet_manager.bullets:
-
+                
+                # enemy bullet collision
                 if entity.rect.colliderect(bullet.rect):
-                    
                     if entity.deduct_health(bullet.damage):
                         self.camera.start_shake(4)
                         self.sfx.play("hit")
@@ -195,8 +201,8 @@ class Game:
                         bullet.piercing -= 1
                         if bullet.piercing <= 0:
                             self.bullet_manager.bullets.remove(bullet)
-                            break
 
+            # enemy player collision
             if entity.rect.colliderect(self.player.rect):
                 if self.player.deduct_health(entity.damage):
                     self.camera.start_shake(6)
@@ -207,14 +213,14 @@ class Game:
 
                     angle = math.degrees(math.atan2(dy, dx))
 
-                    self.player.ext_vel = vec2(-1, 0).rotate(angle).normalize() * self.tile_size
+                    self.player.ext_vel = vec2(-1, 0).rotate(angle).normalize() * self.tile_size # kb
 
                     self.game_state()
 
     def tile_bullet_collision(self):
         for bullet in self.bullet_manager.bullets:
             destroy = bullet.destroy()
-            collided = bullet.collision(self.tiles.get(get_offset(bullet, self.tile_size), None))
+            collided = bullet.collision(self.tiles.get(get_offset(bullet, [self.tile_size]*2), None))
             if destroy or collided:
                 self.particles += [Particle((bullet.rect.centerx + random.randint(8, 10), bullet.rect.centery + random.randint(8, 10)), bullet.angle + random.randint(10, 30) * random.choice([-1, 1]), self.tile_size) for i in range(random.randint(1, 4))]
                 self.bullet_manager.bullets.remove(bullet)
@@ -300,7 +306,7 @@ class Game:
             if len(self.bullet_manager.bullets) > 0 or self.player.rect.topleft != self.player.ori_pos:
                 self.enemy_manager.pursued = True
 
-            player_offset = get_offset(self.player, self.tile_size)
+            player_offset = get_offset(self.player, [self.tile_size]*2)
             collide_tiles = []
             for offset in [(-1, 0), (0, -1), (1, 0), (0, 1), (-1, -1), (1, -1), (-1, 1), (1, 1)]:
                 tile_offset = (player_offset[0] + offset[0], player_offset[1] + offset[1])
@@ -314,7 +320,7 @@ class Game:
             self.weapon.update(self.dt)
             self.bullet_manager.update(self.dt)
             self.tile_bullet_collision()
-            self.entity_bullet_collision()
+            self.entities_collisions()
 
             self.upgrade()
             self.spawn_wave()

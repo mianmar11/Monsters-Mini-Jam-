@@ -1,31 +1,34 @@
-import pygame as py
+import pygame
 import asyncio
 from scripts.game import Game
 
-py.init()
+pygame.init()
 
-window = py.display.set_mode([640, 360], py.SCALED)
-py.display.set_caption('1 Blast')
+window = pygame.display.set_mode([640, 360], pygame.SCALED)
+pygame.display.set_caption('1 Blast')
 
 game = Game(window)
-clock = py.time.Clock()
-font = py.font.Font(None, 32)
+clock = pygame.time.Clock()
+font = pygame.font.Font(None, 32)
 
 dt_setting = 60
-fps_event = py.USEREVENT
-py.time.set_timer(fps_event, 250)
-py.mouse.set_visible(0)
+fps_event = pygame.USEREVENT
+pygame.time.set_timer(fps_event, 250)
+pygame.mouse.set_visible(0)
 
 
 async def run():
     running = True
 
     while running:
-        for event in py.event.get():
+        for event in pygame.event.get():
             game.event_controls(event)
 
-            if event.type == py.QUIT:
+            if event.type == pygame.QUIT:
                 running = False
+            
+            if event.type == fps_event:
+                pygame.display.set_caption(f"FPS: {clock.get_fps():.1f}")
 
         # Delta time 
         dt = clock.tick(1000) / 1000.0
@@ -36,10 +39,10 @@ async def run():
         window.fill((30, 30, 30))
         game.update(dt)
 
-        py.display.flip()
+        pygame.display.flip()
         await asyncio.sleep(0)
 
 
 if __name__ == '__main__':
     asyncio.run(run())
-    # py.quit()
+    # pygame.quit()

@@ -25,7 +25,7 @@ class Entity:
 
         self.health = 5
         self.flicker_timer = 0
-        self.damage_taken_cooldown = 30
+        self.damage_taken_cooldown = 15
 
         self.damage_timer = 0
 

@@ -2,7 +2,7 @@ import random, pygame
 
 from scripts.entities.entity import Entity
 
-from scripts.utils import get_offset
+from scripts.utilities.utils import get_offset
 
 class Enemy(Entity):
     def __init__(self, tile_size, pos, damage=1, health=3, dash_speed=6):
@@ -124,7 +124,7 @@ class EnemyManager:
         for enemy in self.enemies:
             enemy.update(delta_time, player)
 
-            enemy_offset = get_offset(enemy, self.tile_size)
+            enemy_offset = get_offset(enemy, [self.tile_size]*2)
             collide_tiles = []
             for offset in [(-1, 0), (0, -1), (1, 0), (0, 1), (-1, -1), (1, -1), (-1, 1), (1, 1)]:
                 tile_offset = (enemy_offset[0] + offset[0], enemy_offset[1] + offset[1])
