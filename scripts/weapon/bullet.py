@@ -8,14 +8,14 @@ class Bullet:
 
         self.hitbox = [self.tile_size/4, self.tile_size/4, self.tile_size/2, self.tile_size/2]
 
-        self.image = pygame.Surface((self.tile_size, self.tile_size/2), pygame.SRCALPHA).convert_alpha()
-        pygame.draw.rect(self.image, 'yellow', (0, 0, self.tile_size, self.tile_size/2))
-        pygame.draw.rect(self.image, 'white', (1, 1, self.tile_size - 2, self.tile_size/2 - 2))
+        self.ori_image = pygame.Surface((self.tile_size, self.tile_size/2), pygame.SRCALPHA).convert_alpha()
+        pygame.draw.rect(self.ori_image, 'yellow', (0, 0, self.tile_size, self.tile_size/2))
+        pygame.draw.rect(self.ori_image, 'white', (1, 1, self.tile_size - 2, self.tile_size/2 - 2))
 
-        self.shadow = pygame.mask.from_surface(self.image)
-        self.shadow = self.shadow.to_surface(setcolor=(255, 255, 255, 255), unsetcolor=(0, 0, 0, 0))
-        self.shadow.fill((0, 0, 0))
-        self.shadow.set_alpha(48)
+        self.image = pygame.transform.rotozoom(self.ori_image.copy(), -self.angle, 1)
+
+        self.shadow = pygame.mask.from_surface(self.image.copy())
+        self.shadow = self.shadow.to_surface(unsetcolor=(255, 255, 255, 255), setcolor=(0, 0, 0, 255))
 
         self.x, self.y = pos[0] + self.tile_size * math.cos(math.radians(self.angle)), pos[1] + self.tile_size * math.sin(math.radians(self.angle))
         self.rect = pygame.Rect((0, 0), (self.hitbox[2], self.hitbox[3]))
@@ -36,18 +36,23 @@ class Bullet:
 
         self.damage = 1
 
+    def draw_shadow(self, draw_surf, camera_offset):
+        img = self.image
+        shadow_img = self.shadow
+
+        render_x = self.rect.x - camera_offset[0] - (img.get_width() - self.hitbox[2]) / 2
+        render_y = self.rect.y - camera_offset[1] - (img.get_height() - self.hitbox[3]) / 2
+
+        draw_surf.blit(shadow_img, (render_x, render_y + self.shadow.get_height()), special_flags=pygame.BLEND_RGBA_MULT)
+
     def draw(self, draw_surf, camera_offset):
         if self.flash_timer > 0:
             img = self.flash
         else:
-            img = self.image 
-            img = pygame.transform.rotozoom(img, -self.angle, 1)
+            img = self.image
         render_x = self.rect.x - camera_offset[0] - (img.get_width() - self.hitbox[2]) / 2
         render_y = self.rect.y - camera_offset[1] - (img.get_height() - self.hitbox[3]) / 2
         
-        shadow_img = pygame.transform.rotate(self.shadow, -self.angle)
-
-        draw_surf.blit(shadow_img, (render_x, render_y + self.shadow.get_height()))
         draw_surf.blit(img, (render_x, render_y))
         # pygame.draw.polygon(draw_surf, 'red', [(self.rect.x - camera_offset[0], self.rect.y - camera_offset[1]), (self.rect.x - camera_offset[0] + self.hitbox[2], self.rect.y - camera_offset[1]), (self.rect.x - camera_offset[0] + self.hitbox[2], self.rect.y - camera_offset[1] + self.hitbox[3]), (self.rect.x - camera_offset[0], self.rect.y - camera_offset[1] + self.hitbox[3])], 1)
         # pygame.draw.rect(draw_surf, 'red', (self.rect.x - camera_offset[0], self.rect.y - camera_offset[1], self.hitbox[2], self.hitbox[3]), 1)
@@ -87,6 +92,10 @@ class BulletManager:
     def add_bullet(self, pos, angle):
         self.bullets.append(Bullet(self.tile_size, pos, angle))
     
+    def draw_shadow(self, draw_surf, camera_offset):
+        for bullet in self.bullets:
+            bullet.draw_shadow(draw_surf, camera_offset)
+
     def draw(self, draw_surf, camera_offset):
         for bullet in self.bullets:
             bullet.draw(draw_surf, camera_offset)

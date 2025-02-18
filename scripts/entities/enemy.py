@@ -115,6 +115,10 @@ class EnemyManager:
     def spawn(self, pos):
         self.enemies.append(Enemy(self.tile_size, pos, random.choice(self.damages), random.choice(self.healths), random.choice(self.dash_speed)))
     
+    def draw_shadow(self, draw_surf, camera_offset):
+        for enemy in self.enemies:
+            enemy.draw_shadow(draw_surf, camera_offset)
+
     def draw(self, draw_surf, camera_offset):
         for enemy in self.enemies:
             enemy.draw(draw_surf, camera_offset)

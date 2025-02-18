@@ -3,6 +3,7 @@ import asyncio
 from scripts.game import Game
 
 pygame.init()
+pygame.joystick.init()
 
 window = pygame.display.set_mode([640, 360], pygame.SCALED)
 pygame.display.set_caption('1 Blast')
@@ -11,13 +12,14 @@ game = Game(window)
 clock = pygame.time.Clock()
 font = pygame.font.Font(None, 32)
 
-dt_setting = 60
 fps_event = pygame.USEREVENT
 pygame.time.set_timer(fps_event, 250)
 pygame.mouse.set_visible(0)
 
 
-async def run():
+
+async def run(): 
+    dt_setting = 60
     running = True
 
     while running:
@@ -26,7 +28,16 @@ async def run():
 
             if event.type == pygame.QUIT:
                 running = False
-
+            
+            if event.type == fps_event:
+                pygame.display.set_caption(f"FPS: {clock.get_fps():.1f}")
+            
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    dt_setting = 5
+                elif event.key == pygame.K_DOWN:
+                    dt_setting = 60
+            
         # Delta time 
         dt = clock.tick(1000) / 1000.0
         dt *= dt_setting

@@ -14,7 +14,6 @@ class Entity:
 
         self.shadow = pygame.Surface((self.tile_size + self.tile_size/4, self.tile_size/1.5)).convert_alpha()
         self.shadow.fill((0, 0, 0))
-        self.shadow.set_alpha(48)
         
         self.scale_x = 1.0
         self.scale_y = 1.0
@@ -37,6 +36,12 @@ class Entity:
             return True
         return
     
+    def draw_shadow(self, draw_surf, camera_offset):
+        render_x = self.rect.x - camera_offset[0] - (self.shadow.get_width() - self.image.get_width()) / 2
+        render_y = self.rect.y - camera_offset[1] + self.image.get_height()
+
+        draw_surf.blit(self.shadow, (render_x, render_y), special_flags=pygame.BLEND_RGBA_MULT)
+
     def draw(self, draw_surf, camera_offset):
         scale_x = self.scale_x
         scale_y = self.scale_y
@@ -49,7 +54,6 @@ class Entity:
         render_x = self.rect.x - camera_offset[0] - (img.get_width() - self.image.get_width()) / 2
         render_y = self.rect.y - camera_offset[1] - (img.get_width() - self.image.get_height()) / 2
 
-        draw_surf.blit(self.shadow, (self.rect.x - camera_offset[0] - (self.shadow.get_width() - self.image.get_width()) / 2, self.rect.y - camera_offset[1] + self.image.get_height()))
         draw_surf.blit(img, (render_x, render_y))
     
     def move(self, tiles):

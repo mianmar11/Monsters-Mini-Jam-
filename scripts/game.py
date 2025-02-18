@@ -21,11 +21,16 @@ class Game:
     def __init__(self, window):
         self.window = window
         self.WIDTH, self.HEIGHT = self.window.get_size()
-        self.chunk_size = [32, 18]
+        self.chunk_size = [24, 15]
         self.WORLD_MAP_SIZE = [self.WIDTH//16 * 5, self.HEIGHT//16 * 5]
         self.fade = self.window.copy()
+        self.shadow_surf = self.window.copy()
+        self.shadow_surf.fill((0, 0, 0))
+        self.shadow_surf.set_colorkey((0, 0, 0))
+        self.shadow_surf.set_alpha(48)
 
         self.tile_size = 16
+        self.controller = None
 
         self.cursor = Cursor(self.tile_size)
         self.text_manager = TextManager(self.tile_size, (self.WIDTH, self.HEIGHT))
@@ -33,6 +38,9 @@ class Game:
 
         self.sfx = SFX()
         self.sfx.play('music', loop=-1)
+
+        self.mbutton = [0, 0, 0]
+        self.mx, self.my = pygame.mouse.get_pos()
         
         self.shockwaves = []
         self.particles = []
@@ -154,7 +162,19 @@ class Game:
                 self.window.blit(self.chunk_surfs[chunk_offset], [chunk_offset[0] * self.chunk_size[0] * self.tile_size - camera_offset[0], chunk_offset[1] * self.chunk_size[1] * self.tile_size - camera_offset[1]])
             except KeyError:
                 pass
+        
+        # clear shadow surf
+        self.shadow_surf.fill((255, 255, 255))
+        self.shadow_surf.set_colorkey((255, 255, 255))
+        
+        # draw shadow shadow
+        self.enemy_manager.draw_shadow(self.shadow_surf, camera_offset)
+        self.player.draw_shadow(self.shadow_surf, camera_offset)
+        self.bullet_manager.draw_shadow(self.shadow_surf, camera_offset)
 
+        self.window.blit(self.shadow_surf, (0, 0))
+
+        # draw objects
         self.enemy_manager.draw(self.window, camera_offset)
         self.player.draw(self.window, camera_offset)
         self.bullet_manager.draw(self.window, camera_offset)
@@ -189,6 +209,10 @@ class Game:
                 # enemy bullet collision
                 if entity.rect.colliderect(bullet.rect):
                     if entity.deduct_health(bullet.damage):
+                        if self.controller != None:
+                            self.controller.stop_rumble()
+                            self.controller.rumble(5, 5, 100)
+
                         self.camera.start_shake(4)
                         self.sfx.play("hit")
                         self.particles += [Particle((entity.rect.centerx + random.randint(8, 10), entity.rect.centery + random.randint(8, 10)), bullet.angle + random.randint(10, 30) * random.choice([-1, 1]), self.tile_size) for i in range(random.randint(1, 4))]
@@ -218,6 +242,10 @@ class Game:
                     self.player.ext_vel = vec2(-1, 0).rotate(angle).normalize() * self.tile_size # kb
 
                     self.game_state()
+
+                    if self.controller != None:
+                        self.controller.stop_rumble()
+                        self.controller.rumble(10, 10, 100)
 
     def tile_bullet_collision(self):
         for bullet in self.bullet_manager.bullets:
@@ -292,17 +320,22 @@ class Game:
                     self.player.scale(0.8, 1)
                 else:
                     self.player.scale(1, 0.8)
+                
+                if self.controller != None:
+                    self.controller.rumble(0.1, 0.1, 100)
 
     def update(self, delta_time):
         self.dt = delta_time
-        mx, my = pygame.mouse.get_pos()
-        mbutton = pygame.mouse.get_pressed()
+        self.mbutton = list(pygame.mouse.get_pressed())
+        if self.controller != None:
+            self.controller_analog()
+            self.controller_trig()
                 
-        camera_offset = self.camera.offset(self.player, self.dt, mx, my)
+        camera_offset = self.camera.offset(self.player, self.dt, self.mx, self.my)
         self.player.update(self.dt)
         
         if self.game_started and self.lost == False:
-            self.shoot(mx, my, mbutton, camera_offset)
+            self.shoot(self.mx, self.my, self.mbutton, camera_offset)
 
             # make all the enemies chase as soon as player moves or shoots
             if len(self.bullet_manager.bullets) > 0 or self.player.rect.topleft != self.player.ori_pos:
@@ -329,7 +362,7 @@ class Game:
 
         self.draw(camera_offset)
         self.minimap()
-        self.cursor.update(self.dt, self.window, (mx, my))
+        self.cursor.update(self.dt, self.window, (self.mx, self.my))
         
         # UI 
         # will only run once at the start of the program
@@ -364,14 +397,35 @@ class Game:
 
         self.text_manager.draw(self.window, self.dt)
 
+    def controller_trig(self):
+        if self.controller.get_axis(5) > 0.5 or self.controller.get_axis(4) > 0.5:
+            self.mbutton[0] = True
+    
+    def controller_analog(self):
+        # left analog
+        self.player.controller(self.controller, 0.2)
+        
+        r_analog = vec2(self.controller.get_axis(2), self.controller.get_axis(3))
+
+        if abs(r_analog.x) > 0.2 or abs(r_analog.y) > 0.2:
+            self.mx = r_analog.x * self.tile_size * 5 + self.WIDTH/2
+            self.my = r_analog.y * self.tile_size * 5 + self.HEIGHT/2
+
     def event_controls(self, event):
         if event.type == pygame.KEYUP:
-            self.player.keyup(event.key)
+            pass
 
         if event.type == pygame.KEYDOWN:
-            self.player.keydown(event.key)
             if self.text_manager.need_input:
                 if event.key == pygame.K_r:
                     self.fade_in = False
                     self.text_manager.render_queue.clear()
                     self.restart()
+
+        if event.type == pygame.JOYDEVICEADDED:
+            self.controller = pygame.joystick.Joystick(0)
+            self.controller.init()
+            print(self.controller.get_name())
+    
+        if event.type == pygame.MOUSEMOTION:
+            self.mx, self.my = pygame.mouse.get_pos()

@@ -19,44 +19,42 @@ class Player(Entity):
 
         self.damage_taken_cooldown = 60
     
-    def keydown(self, key):
-        if key == pygame.K_w:
-            self.directions['up'] = True
-        elif key == pygame.K_s:
-            self.directions['down'] = True
+    def controller(self, controller, threshold):
+        x = controller.get_axis(0)
+        y = controller.get_axis(1)
+        self.vel.x = x if abs(x) > threshold else 0
+        self.vel.y = y if abs(y) > threshold else 0
 
-        if key == pygame.K_d:
-            self.directions['right'] = True
-        elif key == pygame.K_a:
-            self.directions['left'] = True
-    
-    def keyup(self, key):
-        if key == pygame.K_w:
-            self.directions['up'] = False
-        elif key == pygame.K_s:
-            self.directions['down'] = False
+    def keydown(self):
+        key = pygame.key.get_pressed()
 
-        if key == pygame.K_d:
-            self.directions['right'] = False
-        elif key == pygame.K_a:
-            self.directions['left'] = False
-
-    def set_vel(self):
-        self.vel = vec2(0, 0)
-        if self.directions['up']:
+        if key[pygame.K_w]:
             self.vel.y = -1
-        elif self.directions['down']:
+        elif key[pygame.K_s]:
             self.vel.y = 1
-        
-        if self.directions['right']:
+
+        if key[pygame.K_d]:
             self.vel.x = 1
-        elif self.directions['left']:
+        elif key[pygame.K_a]:
             self.vel.x = -1
+    
+    def keyup(self):
+        key = pygame.key.get_just_released()
+        if key[pygame.K_w]:
+            self.vel.y = 0
+        elif key[pygame.K_s]:
+            self.vel.y = 0
+
+        if key[pygame.K_d]:
+            self.vel.x = 0
+        elif key[ pygame.K_a]:
+            self.vel.x = 0
 
     def update(self, delta_time):
         self.dt = delta_time
         self.rescale()
-        self.set_vel()
+        self.keydown()
+        self.keyup()
 
         self.ext_vel.x += (0 - self.ext_vel.x) * 0.5 * self.dt
         self.ext_vel.y += (0 - self.ext_vel.y) * 0.5 * self.dt
@@ -69,22 +67,31 @@ class Player(Entity):
         self.damage_timer -= self.dt
         self.flicker_timer -= self.dt
  
+    def draw_shadow(self, draw_surf, camera_offset):
+        shadow_img = self.shadow.copy()
+        # shadow_img = pygame.transform.rotate(self.shadow.copy(), self.angle)
+
+        render_x = self.rect.x - camera_offset[0] - (shadow_img.get_width() - self.image.get_width()) / 2
+        render_y = self.rect.y - camera_offset[1] + self.image.get_height() - self.shadow.get_height()/4
+        
+        draw_surf.blit(shadow_img, (render_x, render_y), special_flags=pygame.BLEND_RGBA_MULT)
+    
     def draw(self, draw_surf, camera_offset):
-        if self.directions['left']: # tilt left and stretch if moving left
+        if self.vel.x < 0: # tilt left and stretch if moving left
             self.angle += (10 - self.angle) * 0.3 * self.dt
             self.scale_x += (0.9 - self.scale_x) * 0.5 * self.dt
             self.scale_y += (1.1 - self.scale_y) * 0.5 * self.dt
-        elif self.directions['right']: # tilt right and stretch if moving right
+        elif self.vel.x > 0: # tilt right and stretch if moving right
             self.angle += (-10 - self.angle) * 0.3 * self.dt
             self.scale_x += (0.9 - self.scale_x) * 0.5 * self.dt
             self.scale_y += (1.1 - self.scale_y) * 0.5 * self.dt
         else: # do not tilt
             self.angle += (0 - self.angle) * 0.3 * self.dt
         
-        if self.directions['up']: # stretch if moving upwards
+        if self.vel.y < 0: # stretch if moving upwards
             self.scale_x += (0.8 - self.scale_x) * 0.5 * self.dt
             self.scale_y += (1.2 - self.scale_y) * 0.5 * self.dt
-        elif self.directions['down']: # squish if moving downwards
+        elif self.vel.y > 0: # squish if moving downwards
             self.scale_x += (1.2 - self.scale_x) * 0.5 * self.dt
             self.scale_y += (0.8 - self.scale_y) * 0.5 * self.dt    
         
@@ -97,12 +104,9 @@ class Player(Entity):
             img.fill('red')
         
         img = pygame.transform.rotate(img, self.angle)
-        shadow_img = self.shadow.copy()
-        # shadow_img = pygame.transform.rotate(self.shadow.copy(), self.angle)
 
         render_x = self.rect.x - camera_offset[0] - (img.get_width() - self.image.get_width()) / 2
         render_y = self.rect.y - camera_offset[1] - (img.get_width() - self.image.get_height()) / 2
 
-        draw_surf.blit(shadow_img, (self.rect.x - camera_offset[0] - (shadow_img.get_width() - self.image.get_width()) / 2, self.rect.y - camera_offset[1] + self.image.get_height() - self.shadow.get_height()/4))
         draw_surf.blit(img, (render_x, render_y))
     
