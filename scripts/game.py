@@ -150,8 +150,10 @@ class Game:
 
         for offset in neighbor_offsets:
             chunk_offset = (player_chunk_offset[0] + offset[0], player_chunk_offset[1] + offset[1])
-            # print(i[0] * self.chunk_size[0] * self.tile_size, i[1] * self.chunk_size[1] * self.tile_size)
-            self.window.blit(self.chunk_surfs[chunk_offset], [chunk_offset[0] * self.chunk_size[0] * self.tile_size - camera_offset[0], chunk_offset[1] * self.chunk_size[1] * self.tile_size - camera_offset[1]])
+            try:
+                self.window.blit(self.chunk_surfs[chunk_offset], [chunk_offset[0] * self.chunk_size[0] * self.tile_size - camera_offset[0], chunk_offset[1] * self.chunk_size[1] * self.tile_size - camera_offset[1]])
+            except KeyError:
+                pass
 
         self.enemy_manager.draw(self.window, camera_offset)
         self.player.draw(self.window, camera_offset)

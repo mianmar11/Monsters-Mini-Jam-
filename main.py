@@ -26,9 +26,6 @@ async def run():
 
             if event.type == pygame.QUIT:
                 running = False
-            
-            if event.type == fps_event:
-                pygame.display.set_caption(f"FPS: {clock.get_fps():.1f}")
 
         # Delta time 
         dt = clock.tick(1000) / 1000.0

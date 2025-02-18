@@ -659,6 +659,10 @@
    'C:\\Users\\NITRO '
    '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\PyInstaller\\fake-modules\\_pyi_rth_utils\\__init__.py',
    'PYMODULE'),
+  ('stringprep',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\stringprep.py',
+   'PYMODULE'),
   ('tracemalloc',
    'C:\\Users\\NITRO '
    '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\tracemalloc.py',
@@ -667,22 +671,30 @@
    'C:\\Users\\NITRO '
    '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\_py_abc.py',
    'PYMODULE'),
-  ('stringprep',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\stringprep.py',
-   'PYMODULE'),
   ('scripts.game', 'D:\\Projects\\Monsters\\scripts\\game.py', 'PYMODULE'),
   ('scripts', '-', 'PYMODULE'),
-  ('scripts.sfx', 'D:\\Projects\\Monsters\\scripts\\sfx.py', 'PYMODULE'),
-  ('scripts.utils', 'D:\\Projects\\Monsters\\scripts\\utils.py', 'PYMODULE'),
-  ('scripts.text', 'D:\\Projects\\Monsters\\scripts\\text.py', 'PYMODULE'),
-  ('scripts.cursor', 'D:\\Projects\\Monsters\\scripts\\cursor.py', 'PYMODULE'),
-  ('scripts.particle',
-   'D:\\Projects\\Monsters\\scripts\\particle.py',
+  ('scripts.utilities.sfx',
+   'D:\\Projects\\Monsters\\scripts\\utilities\\sfx.py',
    'PYMODULE'),
-  ('scripts.camera', 'D:\\Projects\\Monsters\\scripts\\camera.py', 'PYMODULE'),
-  ('scripts.shockwave',
-   'D:\\Projects\\Monsters\\scripts\\shockwave.py',
+  ('scripts.utilities', '-', 'PYMODULE'),
+  ('scripts.utilities.utils',
+   'D:\\Projects\\Monsters\\scripts\\utilities\\utils.py',
+   'PYMODULE'),
+  ('scripts.utilities.text',
+   'D:\\Projects\\Monsters\\scripts\\utilities\\text.py',
+   'PYMODULE'),
+  ('scripts.utilities.cursor',
+   'D:\\Projects\\Monsters\\scripts\\utilities\\cursor.py',
+   'PYMODULE'),
+  ('scripts.effects.particle',
+   'D:\\Projects\\Monsters\\scripts\\effects\\particle.py',
+   'PYMODULE'),
+  ('scripts.effects', '-', 'PYMODULE'),
+  ('scripts.utilities.camera',
+   'D:\\Projects\\Monsters\\scripts\\utilities\\camera.py',
+   'PYMODULE'),
+  ('scripts.effects.shockwave',
+   'D:\\Projects\\Monsters\\scripts\\effects\\shockwave.py',
    'PYMODULE'),
   ('scripts.weapon.ranged',
    'D:\\Projects\\Monsters\\scripts\\weapon\\ranged.py',
@@ -695,15 +707,18 @@
   ('scripts.entities.entity',
    'D:\\Projects\\Monsters\\scripts\\entities\\entity.py',
    'PYMODULE'),
-  ('scripts.entities.bullet',
-   'D:\\Projects\\Monsters\\scripts\\entities\\bullet.py',
+  ('scripts.weapon.bullet',
+   'D:\\Projects\\Monsters\\scripts\\weapon\\bullet.py',
    'PYMODULE'),
   ('scripts.entities.player',
    'D:\\Projects\\Monsters\\scripts\\entities\\player.py',
    'PYMODULE'),
-  ('scripts.tile', 'D:\\Projects\\Monsters\\scripts\\tile.py', 'PYMODULE'),
-  ('scripts.terrain',
-   'D:\\Projects\\Monsters\\scripts\\terrain.py',
+  ('scripts.tiling.tile',
+   'D:\\Projects\\Monsters\\scripts\\tiling\\tile.py',
+   'PYMODULE'),
+  ('scripts.tiling', '-', 'PYMODULE'),
+  ('scripts.tiling.terrain',
+   'D:\\Projects\\Monsters\\scripts\\tiling\\terrain.py',
    'PYMODULE'),
   ('noise',
    'C:\\Users\\NITRO '
@@ -2333,69 +2348,69 @@
    'C:\\Users\\NITRO '
    '5\\AppData\\Local\\Programs\\Python\\Python310\\python310.dll',
    'BINARY'),
+  ('SDL2_mixer.dll',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\SDL2_mixer.dll',
+   'BINARY'),
   ('portmidi.dll',
    'C:\\Users\\NITRO '
    '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\portmidi.dll',
-   'BINARY'),
-  ('freetype.dll',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\freetype.dll',
-   'BINARY'),
-  ('libopusfile-0.dll',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libopusfile-0.dll',
-   'BINARY'),
-  ('libwebp-7.dll',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libwebp-7.dll',
    'BINARY'),
   ('libxmp.dll',
    'C:\\Users\\NITRO '
    '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libxmp.dll',
    'BINARY'),
-  ('SDL2.dll',
+  ('libpng16-16.dll',
    'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\SDL2.dll',
-   'BINARY'),
-  ('libwebpdemux-2.dll',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libwebpdemux-2.dll',
-   'BINARY'),
-  ('SDL2_image.dll',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\SDL2_image.dll',
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libpng16-16.dll',
    'BINARY'),
   ('libtiff-5.dll',
    'C:\\Users\\NITRO '
    '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libtiff-5.dll',
    'BINARY'),
+  ('freetype.dll',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\freetype.dll',
+   'BINARY'),
+  ('libwebp-7.dll',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libwebp-7.dll',
+   'BINARY'),
+  ('SDL2.dll',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\SDL2.dll',
+   'BINARY'),
   ('SDL2_ttf.dll',
    'C:\\Users\\NITRO '
    '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\SDL2_ttf.dll',
    'BINARY'),
-  ('SDL2_mixer.dll',
+  ('libopusfile-0.dll',
    'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\SDL2_mixer.dll',
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libopusfile-0.dll',
    'BINARY'),
-  ('libjpeg-62.dll',
+  ('libwavpack-1.dll',
    'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libjpeg-62.dll',
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libwavpack-1.dll',
    'BINARY'),
   ('libogg-0.dll',
    'C:\\Users\\NITRO '
    '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libogg-0.dll',
    'BINARY'),
-  ('libpng16-16.dll',
+  ('SDL2_image.dll',
    'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libpng16-16.dll',
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\SDL2_image.dll',
    'BINARY'),
   ('libopus-0.dll',
    'C:\\Users\\NITRO '
    '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libopus-0.dll',
    'BINARY'),
-  ('libwavpack-1.dll',
+  ('libjpeg-62.dll',
    'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libwavpack-1.dll',
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libjpeg-62.dll',
+   'BINARY'),
+  ('libwebpdemux-2.dll',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libwebpdemux-2.dll',
    'BINARY'),
   ('libopenblas64__v0.3.21-gcc_10_3_0.dll',
    'C:\\Users\\NITRO '
@@ -2653,6 +2668,10 @@
    'C:\\Users\\NITRO '
    '5\\AppData\\Local\\Programs\\Python\\Python310\\VCRUNTIME140.dll',
    'BINARY'),
+  ('pygame\\SDL2.dll',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\SDL2.dll',
+   'BINARY'),
   ('pygame\\libogg-0.dll',
    'C:\\Users\\NITRO '
    '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libogg-0.dll',
@@ -2664,10 +2683,6 @@
   ('pygame\\libwebp-7.dll',
    'C:\\Users\\NITRO '
    '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libwebp-7.dll',
-   'BINARY'),
-  ('pygame\\SDL2.dll',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\SDL2.dll',
    'BINARY'),
   ('libcrypto-1_1.dll',
    'C:\\Users\\NITRO '
