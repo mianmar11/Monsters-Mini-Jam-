@@ -13,11 +13,16 @@ class Particle:
         self.radius = random.randint(self.tile_size//2, self.tile_size)
         self.color = random.choice(['#a27c54', '#c99a6a', '#bb9064'])
     
+    def draw_shadow(self, draw_surf, camera_offset):
+        render_x = self.pos[0] - camera_offset[0]
+        render_y = self.pos[1] - camera_offset[1] + self.tile_size
+        
+        pygame.draw.circle(draw_surf, (0, 0, 0), (render_x, render_y), self.radius)
+
     def draw(self, draw_surf, camera_offset):
         render_x = self.pos[0] - camera_offset[0]
         render_y = self.pos[1] - camera_offset[1]
         
-        pygame.draw.circle(draw_surf, (10, 10, 10), (render_x, render_y + 2), self.radius)
         pygame.draw.circle(draw_surf, self.color, (render_x, render_y), self.radius)
     
     def update(self, delta_time):

@@ -2,7 +2,6 @@ import pygame, random
 
 class SFX:
     def __init__(self):
-        pygame.mixer.init()  # Initialize the mixer
         self.sounds = {
             "shoot": [pygame.mixer.Sound("sfx/shoot.wav"), pygame.mixer.Sound("sfx/shoot2.wav")],
             'hit': [pygame.mixer.Sound("sfx/hit.wav"), pygame.mixer.Sound("sfx/hit2.wav")],

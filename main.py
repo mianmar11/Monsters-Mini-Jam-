@@ -1,11 +1,14 @@
-import pygame
 import asyncio
+import pygame
 from scripts.game import Game
 
+pygame.mixer.pre_init(44100, -16, 2, 512)
 pygame.init()
+pygame.display.init()
 pygame.joystick.init()
+# pygame.mixer.init()  # Initialize the mixer
 
-window = pygame.display.set_mode([640, 360], pygame.SCALED)
+window = pygame.display.set_mode((640, 360), pygame.SCALED|pygame.RESIZABLE)
 pygame.display.set_caption('1 Blast')
 
 game = Game(window)
@@ -15,7 +18,6 @@ font = pygame.font.Font(None, 32)
 fps_event = pygame.USEREVENT
 pygame.time.set_timer(fps_event, 250)
 pygame.mouse.set_visible(0)
-
 
 
 async def run(): 
@@ -40,8 +42,8 @@ async def run():
             
         # Delta time 
         dt = clock.tick(1000) / 1000.0
+        dt = min(dt, 1/20) 
         dt *= dt_setting
-        dt = min(dt, 3) 
 
         # Update game
         window.fill((30, 30, 30))
@@ -52,5 +54,5 @@ async def run():
 
 
 if __name__ == '__main__':
-    asyncio.run(run())
-    # pygame.quit()
+    asyncio.get_event_loop().run_until_complete(run())
+

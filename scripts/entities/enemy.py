@@ -67,21 +67,25 @@ class Enemy(Entity):
         if self.vel.length() > 0:
             self.vel = self.vel.normalize()
 
+        # Interpolate speed changes to avoid sudden spikes at low FPS
         if self.dash_timer > 0:
-            self.speed += (self.dash_speed - self.speed) * self.dt
+            self.speed += (self.dash_speed - self.speed) * min(self.dt * 10, 1.0)
         else:
-            self.speed += (0 - self.speed) * 0.5 * self.dt
-        self.total_vel = self.vel * self.speed + self.ext_vel
+            self.speed += (0 - self.speed) * min(0.5 * self.dt * 10, 1.0)
 
+        self.total_vel = self.vel * self.speed + self.ext_vel  
+
+        # Move in Y direction and handle collisions
         self.y += self.total_vel.y * self.dt
-        self.rect.y = self.y
+        self.rect.y = round(self.y)  
         self.vertical_collision(tiles)
-        self.rect.y = self.y
+        self.rect.y = round(self.y)
 
+        # Move in X direction and handle collisions
         self.x += self.total_vel.x * self.dt
-        self.rect.x = self.x
+        self.rect.x = round(self.x)
         self.horizontal_collision(tiles)
-        self.rect.x = self.x
+        self.rect.x = round(self.x)
 
     def update(self, delta_time, player):
         super().update(delta_time)

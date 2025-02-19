@@ -25,8 +25,8 @@ class Game:
         self.WORLD_MAP_SIZE = [self.WIDTH//16 * 5, self.HEIGHT//16 * 5]
         self.fade = self.window.copy()
         self.shadow_surf = self.window.copy()
-        self.shadow_surf.fill((0, 0, 0))
-        self.shadow_surf.set_colorkey((0, 0, 0))
+        self.shadow_surf.fill((255, 255, 255))
+        self.shadow_surf.set_colorkey((255, 255, 255))
         self.shadow_surf.set_alpha(48)
 
         self.tile_size = 16
@@ -37,7 +37,7 @@ class Game:
         self.camera = Camera((self.WIDTH, self.HEIGHT), self.tile_size)
 
         self.sfx = SFX()
-        self.sfx.play('music', loop=-1)
+        self.sfx.play('music', 0.5, loop=-1)
 
         self.mbutton = [0, 0, 0]
         self.mx, self.my = pygame.mouse.get_pos()
@@ -61,7 +61,7 @@ class Game:
         self.upgraded = False
         self.wave = 1
         self.enemy_manager = EnemyManager(self.tile_size)
-        self.enemy_spawn_rate = 10
+        self.enemy_spawn_rate = 50
         self.spawn_enemies(self.enemy_spawn_rate)
 
         self.weapon = RangeWeapon(self.tile_size)
@@ -165,33 +165,35 @@ class Game:
         
         # clear shadow surf
         self.shadow_surf.fill((255, 255, 255))
-        self.shadow_surf.set_colorkey((255, 255, 255))
         
-        # draw shadow shadow
-        self.enemy_manager.draw_shadow(self.shadow_surf, camera_offset)
-        self.player.draw_shadow(self.shadow_surf, camera_offset)
-        self.bullet_manager.draw_shadow(self.shadow_surf, camera_offset)
+        # Draw shadows
+        for obj in (self.enemy_manager, self.player, self.bullet_manager):
+            obj.draw_shadow(self.shadow_surf, camera_offset)
 
-        self.window.blit(self.shadow_surf, (0, 0))
+        for shockwave in self.shockwaves:
+            shockwave.draw_shadow(self.shadow_surf, camera_offset)
 
-        # draw objects
-        self.enemy_manager.draw(self.window, camera_offset)
-        self.player.draw(self.window, camera_offset)
-        self.bullet_manager.draw(self.window, camera_offset)
+        for particle in self.particles:
+            particle.draw_shadow(self.shadow_surf, camera_offset)
 
-        for shockwave in self.shockwaves.copy():
+        self.window.blit(self.shadow_surf, (0, 0))  # Draw shadows onto main window
+
+        # Draw objects
+        for obj in (self.enemy_manager, self.player, self.bullet_manager):
+            obj.draw(self.window, camera_offset)
+
+        self.shockwaves[:] = [shockwave for shockwave in self.shockwaves if not shockwave.update(self.dt)]
+        for shockwave in self.shockwaves:
             shockwave.draw(self.window, camera_offset)
-            if shockwave.update(self.dt):
-                self.shockwaves.remove(shockwave)
-        
-        for particle in self.particles.copy():
+
+        self.particles[:] = [particle for particle in self.particles if not particle.update(self.dt)]
+        for particle in self.particles:
             particle.draw(self.window, camera_offset)
-            if particle.update(self.dt):
-                self.particles.remove(particle)
 
         # render player health
-        for i in range(self.player.health):
-            pygame.draw.rect(self.window, 'red', (10 + i * self.tile_size, 10, self.tile_size/1.5, self.tile_size/1.5))
+        for i in range(self.player.total_health):
+            if i < self.player.health:
+                pygame.draw.rect(self.window, 'red', (10 + i * self.tile_size, 10, self.tile_size/1.5, self.tile_size/1.5))
             pygame.draw.rect(self.window, 'white', (10 + i * self.tile_size, 10, self.tile_size/1.5, self.tile_size/1.5), 1)
 
     def minimap(self):
@@ -276,10 +278,14 @@ class Game:
                         'Reduced weapon cooldown'
                         self.text_manager.queue_text("Weapon Cooldown: -1", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 + self.tile_size/2)}, 180)
                 else:
-                    if self.player.health < 10:
-                        self.player.health += 1
-                        "Buffed player health"
-                        self.text_manager.queue_text("Player Health: +1", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 + self.tile_size/2)}, 180)
+                    if self.player.health < 3:
+                        self.player.health = self.player.total_health
+                        "refilled player health"
+                        self.text_manager.queue_text("Refilled Player Health", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 + self.tile_size/2)}, 180)
+                    else:
+                        self.player.total_health += 1
+                        "Gained health"
+                        self.text_manager.queue_text("Gained Extra Heart", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 + self.tile_size/2)}, 180)
 
             # not limiting the enemy buffs to make the game harder and challenging overtime
             if self.wave % 2 == 0 and self.upgraded == False:
@@ -312,7 +318,7 @@ class Game:
         angle = math.degrees(math.atan2(my + camera_offset[1] - self.player.rect.centery, mx + camera_offset[0] - self.player.rect.centerx))
         if mbutton[0]:
             if self.weapon.shoot():
-                self.sfx.play('shoot')
+                self.sfx.play('shoot', 1)
                 self.bullet_manager.add_bullet(self.player.rect.center, angle + random.randint(-3, 3))
 
                 self.player.ext_vel = vec2(-1, 0).rotate(angle).normalize() * 1 # knockback
