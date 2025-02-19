@@ -61,7 +61,7 @@ class Game:
         self.upgraded = False
         self.wave = 1
         self.enemy_manager = EnemyManager(self.tile_size)
-        self.enemy_spawn_rate = 50
+        self.enemy_spawn_rate = 10
         self.spawn_enemies(self.enemy_spawn_rate)
 
         self.weapon = RangeWeapon(self.tile_size)

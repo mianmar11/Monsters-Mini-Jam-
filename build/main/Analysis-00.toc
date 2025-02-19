@@ -663,13 +663,13 @@
    'C:\\Users\\NITRO '
    '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\stringprep.py',
    'PYMODULE'),
-  ('tracemalloc',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\tracemalloc.py',
-   'PYMODULE'),
   ('_py_abc',
    'C:\\Users\\NITRO '
    '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\_py_abc.py',
+   'PYMODULE'),
+  ('tracemalloc',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\tracemalloc.py',
    'PYMODULE'),
   ('scripts.game', 'D:\\Projects\\Monsters\\scripts\\game.py', 'PYMODULE'),
   ('scripts', '-', 'PYMODULE'),
@@ -723,146 +723,6 @@
   ('noise',
    'C:\\Users\\NITRO '
    '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\noise\\__init__.py',
-   'PYMODULE'),
-  ('asyncio',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\__init__.py',
-   'PYMODULE'),
-  ('asyncio.unix_events',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\unix_events.py',
-   'PYMODULE'),
-  ('asyncio.log',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\log.py',
-   'PYMODULE'),
-  ('asyncio.windows_events',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\windows_events.py',
-   'PYMODULE'),
-  ('asyncio.windows_utils',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\windows_utils.py',
-   'PYMODULE'),
-  ('asyncio.selector_events',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\selector_events.py',
-   'PYMODULE'),
-  ('asyncio.proactor_events',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\proactor_events.py',
-   'PYMODULE'),
-  ('asyncio.base_subprocess',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\base_subprocess.py',
-   'PYMODULE'),
-  ('asyncio.threads',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\threads.py',
-   'PYMODULE'),
-  ('asyncio.subprocess',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\subprocess.py',
-   'PYMODULE'),
-  ('asyncio.streams',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\streams.py',
-   'PYMODULE'),
-  ('asyncio.queues',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\queues.py',
-   'PYMODULE'),
-  ('asyncio.runners',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\runners.py',
-   'PYMODULE'),
-  ('asyncio.base_events',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\base_events.py',
-   'PYMODULE'),
-  ('concurrent.futures',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\concurrent\\futures\\__init__.py',
-   'PYMODULE'),
-  ('concurrent.futures.thread',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\concurrent\\futures\\thread.py',
-   'PYMODULE'),
-  ('concurrent.futures.process',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\concurrent\\futures\\process.py',
-   'PYMODULE'),
-  ('concurrent.futures._base',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\concurrent\\futures\\_base.py',
-   'PYMODULE'),
-  ('concurrent',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\concurrent\\__init__.py',
-   'PYMODULE'),
-  ('asyncio.trsock',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\trsock.py',
-   'PYMODULE'),
-  ('asyncio.staggered',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\staggered.py',
-   'PYMODULE'),
-  ('asyncio.tasks',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\tasks.py',
-   'PYMODULE'),
-  ('asyncio.locks',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\locks.py',
-   'PYMODULE'),
-  ('asyncio.base_tasks',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\base_tasks.py',
-   'PYMODULE'),
-  ('asyncio.mixins',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\mixins.py',
-   'PYMODULE'),
-  ('asyncio.sslproto',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\sslproto.py',
-   'PYMODULE'),
-  ('asyncio.transports',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\transports.py',
-   'PYMODULE'),
-  ('asyncio.protocols',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\protocols.py',
-   'PYMODULE'),
-  ('asyncio.futures',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\futures.py',
-   'PYMODULE'),
-  ('asyncio.exceptions',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\exceptions.py',
-   'PYMODULE'),
-  ('asyncio.events',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\events.py',
-   'PYMODULE'),
-  ('asyncio.coroutines',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\coroutines.py',
-   'PYMODULE'),
-  ('asyncio.base_futures',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\base_futures.py',
-   'PYMODULE'),
-  ('asyncio.format_helpers',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\format_helpers.py',
-   'PYMODULE'),
-  ('asyncio.constants',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\constants.py',
    'PYMODULE'),
   ('pygame',
    'C:\\Users\\NITRO '
@@ -2343,66 +2203,154 @@
   ('platform',
    'C:\\Users\\NITRO '
    '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\platform.py',
+   'PYMODULE'),
+  ('asyncio',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\__init__.py',
+   'PYMODULE'),
+  ('asyncio.unix_events',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\unix_events.py',
+   'PYMODULE'),
+  ('asyncio.log',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\log.py',
+   'PYMODULE'),
+  ('asyncio.windows_events',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\windows_events.py',
+   'PYMODULE'),
+  ('asyncio.windows_utils',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\windows_utils.py',
+   'PYMODULE'),
+  ('asyncio.selector_events',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\selector_events.py',
+   'PYMODULE'),
+  ('asyncio.proactor_events',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\proactor_events.py',
+   'PYMODULE'),
+  ('asyncio.base_subprocess',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\base_subprocess.py',
+   'PYMODULE'),
+  ('asyncio.threads',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\threads.py',
+   'PYMODULE'),
+  ('asyncio.subprocess',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\subprocess.py',
+   'PYMODULE'),
+  ('asyncio.streams',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\streams.py',
+   'PYMODULE'),
+  ('asyncio.queues',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\queues.py',
+   'PYMODULE'),
+  ('asyncio.runners',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\runners.py',
+   'PYMODULE'),
+  ('asyncio.base_events',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\base_events.py',
+   'PYMODULE'),
+  ('concurrent.futures',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\concurrent\\futures\\__init__.py',
+   'PYMODULE'),
+  ('concurrent.futures.thread',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\concurrent\\futures\\thread.py',
+   'PYMODULE'),
+  ('concurrent.futures.process',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\concurrent\\futures\\process.py',
+   'PYMODULE'),
+  ('concurrent.futures._base',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\concurrent\\futures\\_base.py',
+   'PYMODULE'),
+  ('concurrent',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\concurrent\\__init__.py',
+   'PYMODULE'),
+  ('asyncio.trsock',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\trsock.py',
+   'PYMODULE'),
+  ('asyncio.staggered',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\staggered.py',
+   'PYMODULE'),
+  ('asyncio.tasks',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\tasks.py',
+   'PYMODULE'),
+  ('asyncio.locks',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\locks.py',
+   'PYMODULE'),
+  ('asyncio.base_tasks',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\base_tasks.py',
+   'PYMODULE'),
+  ('asyncio.mixins',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\mixins.py',
+   'PYMODULE'),
+  ('asyncio.sslproto',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\sslproto.py',
+   'PYMODULE'),
+  ('asyncio.transports',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\transports.py',
+   'PYMODULE'),
+  ('asyncio.protocols',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\protocols.py',
+   'PYMODULE'),
+  ('asyncio.futures',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\futures.py',
+   'PYMODULE'),
+  ('asyncio.exceptions',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\exceptions.py',
+   'PYMODULE'),
+  ('asyncio.events',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\events.py',
+   'PYMODULE'),
+  ('asyncio.coroutines',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\coroutines.py',
+   'PYMODULE'),
+  ('asyncio.base_futures',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\base_futures.py',
+   'PYMODULE'),
+  ('asyncio.format_helpers',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\format_helpers.py',
+   'PYMODULE'),
+  ('asyncio.constants',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\asyncio\\constants.py',
    'PYMODULE')],
  [('python310.dll',
    'C:\\Users\\NITRO '
    '5\\AppData\\Local\\Programs\\Python\\Python310\\python310.dll',
    'BINARY'),
-  ('SDL2_mixer.dll',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\SDL2_mixer.dll',
-   'BINARY'),
-  ('portmidi.dll',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\portmidi.dll',
-   'BINARY'),
-  ('libxmp.dll',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libxmp.dll',
-   'BINARY'),
-  ('libpng16-16.dll',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libpng16-16.dll',
-   'BINARY'),
-  ('libtiff-5.dll',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libtiff-5.dll',
-   'BINARY'),
-  ('freetype.dll',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\freetype.dll',
-   'BINARY'),
-  ('libwebp-7.dll',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libwebp-7.dll',
-   'BINARY'),
-  ('SDL2.dll',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\SDL2.dll',
-   'BINARY'),
-  ('SDL2_ttf.dll',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\SDL2_ttf.dll',
-   'BINARY'),
-  ('libopusfile-0.dll',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libopusfile-0.dll',
-   'BINARY'),
-  ('libwavpack-1.dll',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libwavpack-1.dll',
-   'BINARY'),
   ('libogg-0.dll',
    'C:\\Users\\NITRO '
    '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libogg-0.dll',
-   'BINARY'),
-  ('SDL2_image.dll',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\SDL2_image.dll',
-   'BINARY'),
-  ('libopus-0.dll',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libopus-0.dll',
    'BINARY'),
   ('libjpeg-62.dll',
    'C:\\Users\\NITRO '
@@ -2411,6 +2359,58 @@
   ('libwebpdemux-2.dll',
    'C:\\Users\\NITRO '
    '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libwebpdemux-2.dll',
+   'BINARY'),
+  ('SDL2.dll',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\SDL2.dll',
+   'BINARY'),
+  ('libxmp.dll',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libxmp.dll',
+   'BINARY'),
+  ('libwebp-7.dll',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libwebp-7.dll',
+   'BINARY'),
+  ('libwavpack-1.dll',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libwavpack-1.dll',
+   'BINARY'),
+  ('portmidi.dll',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\portmidi.dll',
+   'BINARY'),
+  ('SDL2_mixer.dll',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\SDL2_mixer.dll',
+   'BINARY'),
+  ('freetype.dll',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\freetype.dll',
+   'BINARY'),
+  ('libopus-0.dll',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libopus-0.dll',
+   'BINARY'),
+  ('libopusfile-0.dll',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libopusfile-0.dll',
+   'BINARY'),
+  ('libpng16-16.dll',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libpng16-16.dll',
+   'BINARY'),
+  ('SDL2_ttf.dll',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\SDL2_ttf.dll',
+   'BINARY'),
+  ('libtiff-5.dll',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libtiff-5.dll',
+   'BINARY'),
+  ('SDL2_image.dll',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\SDL2_image.dll',
    'BINARY'),
   ('libopenblas64__v0.3.21-gcc_10_3_0.dll',
    'C:\\Users\\NITRO '
@@ -2475,14 +2475,6 @@
   ('pygame\\math.cp310-win_amd64.pyd',
    'C:\\Users\\NITRO '
    '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\math.cp310-win_amd64.pyd',
-   'EXTENSION'),
-  ('_overlapped.pyd',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\DLLs\\_overlapped.pyd',
-   'EXTENSION'),
-  ('_asyncio.pyd',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\DLLs\\_asyncio.pyd',
    'EXTENSION'),
   ('numpy\\core\\_multiarray_tests.cp310-win_amd64.pyd',
    'C:\\Users\\NITRO '
@@ -2664,9 +2656,21 @@
    'C:\\Users\\NITRO '
    '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\_sdl2\\sdl2.cp310-win_amd64.pyd',
    'EXTENSION'),
+  ('_overlapped.pyd',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\DLLs\\_overlapped.pyd',
+   'EXTENSION'),
+  ('_asyncio.pyd',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\DLLs\\_asyncio.pyd',
+   'EXTENSION'),
   ('VCRUNTIME140.dll',
    'C:\\Users\\NITRO '
    '5\\AppData\\Local\\Programs\\Python\\Python310\\VCRUNTIME140.dll',
+   'BINARY'),
+  ('pygame\\libwebp-7.dll',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libwebp-7.dll',
    'BINARY'),
   ('pygame\\SDL2.dll',
    'C:\\Users\\NITRO '
@@ -2679,10 +2683,6 @@
   ('pygame\\libopus-0.dll',
    'C:\\Users\\NITRO '
    '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libopus-0.dll',
-   'BINARY'),
-  ('pygame\\libwebp-7.dll',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\libwebp-7.dll',
    'BINARY'),
   ('libcrypto-1_1.dll',
    'C:\\Users\\NITRO '
@@ -2721,11 +2721,11 @@
  [('base_library.zip',
    'D:\\Projects\\Monsters\\build\\main\\base_library.zip',
    'DATA'),
-  ('pygame\\freesansbold.ttf',
-   'C:\\Users\\NITRO '
-   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\freesansbold.ttf',
-   'DATA'),
   ('pygame\\pygame_icon.bmp',
    'C:\\Users\\NITRO '
    '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\pygame_icon.bmp',
+   'DATA'),
+  ('pygame\\freesansbold.ttf',
+   'C:\\Users\\NITRO '
+   '5\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\pygame\\freesansbold.ttf',
    'DATA')])
