@@ -2,7 +2,7 @@ import pygame, math, random
 from pygame.math import Vector2 as vec2
 
 class Bullet:
-    def __init__(self, tile_size, pos, angle):
+    def __init__(self, tile_size, pos, angle, piercing=1):
         self.tile_size = tile_size
         self.angle = angle
 
@@ -32,7 +32,7 @@ class Bullet:
 
         self.destruction_timer = 1000
 
-        self.piercing = 1
+        self.piercing = piercing
 
         self.damage = 1
 
@@ -88,9 +88,10 @@ class BulletManager:
 
         self.bullets = []
         self.damage = 1
+        self.piercing = 1
 
     def add_bullet(self, pos, angle):
-        self.bullets.append(Bullet(self.tile_size, pos, angle))
+        self.bullets.append(Bullet(self.tile_size, pos, angle, self.piercing))
     
     def draw_shadow(self, draw_surf, camera_offset):
         for bullet in self.bullets:

@@ -51,6 +51,7 @@ class Game:
 
         self.load()
 
+        self.spawn_radius = 10 # hostile mobs will not spawn within this radius
         spawn_area =  [pos for pos, tile in self.ground_tiles.items() if tile.tile_type not in ('air', 'edge')]
         self.spawn_area = [pos for pos in spawn_area if self.tiles[pos].tile_type in ('air', 'edge')]
         spawn_point = random.choice([pos for pos in self.spawn_area if ((pos[0] - self.WORLD_MAP_SIZE[0]//2)**2 + (pos[1] - self.WORLD_MAP_SIZE[1]//2)**2)**0.5 < self.WORLD_MAP_SIZE[1]/3])
@@ -72,8 +73,10 @@ class Game:
         self.text_manager.queue_text(f"Wave {self.wave}", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2)})
     
     def spawn_enemies(self, amount):
+        player_offset = get_offset(self.player, [self.tile_size]*2)
+        spawn_area = [pos for pos in self.spawn_area if get_distance(player_offset, pos) > self.spawn_radius]
         for i in range(amount):
-            self.enemy_manager.spawn(random.choice(self.spawn_area))
+            self.enemy_manager.spawn(random.choice(spawn_area))
 
     def chunking(self, tiles):
         tiles = tiles.copy()
@@ -118,7 +121,7 @@ class Game:
         
         world_data = generate_world_data(self.WORLD_MAP_SIZE, terrain_data, seed)
         obj_data = generate_world_data(self.WORLD_MAP_SIZE, tile_data, seed)
-
+        
         datas = [world_data, obj_data]
         offices = [self.ground_tiles, self.tiles]
 
@@ -217,7 +220,7 @@ class Game:
 
                         self.camera.start_shake(4)
                         self.sfx.play("hit")
-                        self.particles += [Particle((entity.rect.centerx + random.randint(8, 10), entity.rect.centery + random.randint(8, 10)), bullet.angle + random.randint(10, 30) * random.choice([-1, 1]), self.tile_size) for i in range(random.randint(1, 4))]
+                        self.particles += [Particle((entity.rect.centerx + random.randint(8, 10), entity.rect.centery + random.randint(8, 10)), bullet.angle + random.randint(10, 30) * random.choice([-1, 1]), self.tile_size, None) for i in range(random.randint(1, 4))]
 
                         entity.ext_vel = vec2(1, 0).rotate(bullet.angle).normalize() * 4 # knockback
                         entity.get_pursue()
@@ -231,6 +234,9 @@ class Game:
                             self.bullet_manager.bullets.remove(bullet)
 
             # enemy player collision
+            if self.player.invincible:
+                continue
+            
             if entity.rect.colliderect(self.player.rect):
                 if self.player.deduct_health(entity.damage):
                     self.camera.start_shake(6)
@@ -251,10 +257,11 @@ class Game:
 
     def tile_bullet_collision(self):
         for bullet in self.bullet_manager.bullets:
+            pos = get_offset(bullet, [self.tile_size]*2)
             destroy = bullet.destroy()
-            collided = bullet.collision(self.tiles.get(get_offset(bullet, [self.tile_size]*2), None))
+            collided = bullet.collision(self.tiles.get(pos, None))
             if destroy or collided:
-                self.particles += [Particle((bullet.rect.centerx + random.randint(8, 10), bullet.rect.centery + random.randint(8, 10)), bullet.angle + random.randint(10, 30) * random.choice([-1, 1]), self.tile_size) for i in range(random.randint(1, 4))]
+                self.particles += [Particle((bullet.rect.centerx + random.randint(8, 10) * random.randint(-1, 1), bullet.rect.centery + random.randint(8, 10) * random.randint(-1, 1)), bullet.angle + random.randint(10, 30) * random.choice([-1, 1]), self.tile_size, self.tiles.get(pos, None)) for i in range(random.randint(1, 2))]
                 self.bullet_manager.bullets.remove(bullet)
 
     def game_state(self):
@@ -266,43 +273,47 @@ class Game:
     def upgrade(self):
         if len(self.enemy_manager.enemies) <= 0:
             chance = random.randint(0, 2)
-            if self.wave % 4 == 0 and self.upgraded == False:
-                if chance == 1:
-                    if self.bullet_manager.damage < 6:
-                        self.bullet_manager.damage += 0.5
-                        'Bullets deal more damage'
-                        self.text_manager.queue_text("Bullets Damage: +0.5", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 + self.tile_size/2)}, 180)
-                elif chance == 2:
-                    if self.weapon.cooldown > 4:
-                        self.weapon.cooldown -= 1
-                        'Reduced weapon cooldown'
-                        self.text_manager.queue_text("Weapon Cooldown: -1", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 + self.tile_size/2)}, 180)
-                else:
-                    if self.player.health < 3:
-                        self.player.health = self.player.total_health
-                        "refilled player health"
-                        self.text_manager.queue_text("Refilled Player Health", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 + self.tile_size/2)}, 180)
-                    else:
-                        self.player.total_health += 1
-                        "Gained health"
-                        self.text_manager.queue_text("Gained Extra Heart", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 + self.tile_size/2)}, 180)
-
-            # not limiting the enemy buffs to make the game harder and challenging overtime
-            if self.wave % 2 == 0 and self.upgraded == False:
-                if chance == 1:
-                    self.enemy_manager.damages.append(self.enemy_manager.damages[-1]+1) # add one damage
-                    'enemy deals more damage'
-                    self.text_manager.queue_text("Buffed monster attack damage", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 - self.tile_size/2)}, 180)
-                elif chance == 2:
-                    self.enemy_manager.dash_speed.append(self.enemy_manager.dash_speed[-1]+1)
-                    'enemy speed buffed'
-                    self.text_manager.queue_text("Buffed monster speed", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 - self.tile_size/2)}, 180)
-                else:
-                    self.enemy_manager.healths.append(self.enemy_manager.healths[-1]+1)
-                    'enemy health buffed'
-                    self.text_manager.queue_text("Buffed monster health", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 - self.tile_size/2)}, 180)
+            if self.upgraded == False:
                 
-                self.upgraded = True
+                if self.wave % 3 == 0:
+                    if chance == 1:
+                        if self.bullet_manager.damage < 6:
+                            self.bullet_manager.damage += 0.5
+                            'Bullets deal more damage'
+                            self.text_manager.queue_text("Bullets Damage: +0.5", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 + self.tile_size/2)}, 180)
+                    elif chance == 2:
+                        if self.weapon.cooldown > 4:
+                            self.weapon.cooldown -= 1
+                            'Reduced weapon cooldown'
+                            self.text_manager.queue_text("Weapon Cooldown: -1", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 + self.tile_size/2)}, 180)
+                    else:
+                        if self.player.health == self.player.total_health:
+                            self.player.health = self.player.total_health
+                            "refilled player health"
+                            self.text_manager.queue_text("Refilled Player Health", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 + self.tile_size/2)}, 180)
+                        else:
+                            self.player.total_health += 1
+                            "Gained health"
+                            self.text_manager.queue_text("Gained Extra Heart", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 + self.tile_size/2)}, 180)
+
+                    self.upgraded = True
+
+                # not limiting the enemy buffs to make the game harder and challenging overtime
+                if self.wave % 2 == 0:
+                    if chance == 1:
+                        self.enemy_manager.damages.append(self.enemy_manager.damages[-1]+1) # add one damage
+                        'enemy deals more damage'
+                        self.text_manager.queue_text("Buffed monster attack damage", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 - self.tile_size/2)}, 180)
+                    elif chance == 2:
+                        self.enemy_manager.dash_speed.append(self.enemy_manager.dash_speed[-1]+1)
+                        'enemy speed buffed'
+                        self.text_manager.queue_text("Buffed monster speed", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 - self.tile_size/2)}, 180)
+                    else:
+                        self.enemy_manager.healths.append(self.enemy_manager.healths[-1]+1)
+                        'enemy health buffed'
+                        self.text_manager.queue_text("Buffed monster health", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 - self.tile_size/2)}, 180)
+                    
+                    self.upgraded = True
 
     def spawn_wave(self):
         if len(self.enemy_manager.enemies) <= 0:
@@ -319,7 +330,7 @@ class Game:
         if mbutton[0]:
             if self.weapon.shoot():
                 self.sfx.play('shoot', 1)
-                self.bullet_manager.add_bullet(self.player.rect.center, angle + random.randint(-3, 3))
+                self.bullet_manager.add_bullet(self.player.rect.center, angle + random.randint(-2, 2))
 
                 self.player.ext_vel = vec2(-1, 0).rotate(angle).normalize() * 1 # knockback
                 if abs(self.player.ext_vel.x) > abs(self.player.ext_vel.y):

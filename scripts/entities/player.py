@@ -17,6 +17,8 @@ class Player(Entity):
         }
         self.speed = 2.4
 
+        self.invincible = False
+
         self.damage_taken_cooldown = 60
     
     def controller(self, controller, threshold):

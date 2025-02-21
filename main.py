@@ -18,6 +18,7 @@ font = pygame.font.Font(None, 32)
 fps_event = pygame.USEREVENT
 pygame.time.set_timer(fps_event, 250)
 pygame.mouse.set_visible(0)
+# pygame.event.set_grab(True)
 
 
 async def run(): 
@@ -39,6 +40,9 @@ async def run():
                     dt_setting = 5
                 elif event.key == pygame.K_DOWN:
                     dt_setting = 60
+                
+                if event.key == pygame.K_F11:
+                    pygame.display.toggle_fullscreen()
             
         # Delta time 
         dt = clock.tick(1000) / 1000.0
