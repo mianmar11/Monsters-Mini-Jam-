@@ -25,6 +25,28 @@ class Enemy(Entity):
         self.dash_timer = 8
         self.dash_cooldown_timer = random.randint(0, self.cooldown)
     
+    def reset(self, pos, damage=1, health=3, dash_speed=6):
+        self.x, self.y = pos[0] * self.tile_size, pos[1] * self.tile_size
+        self.ori_pos = self.x, self.y
+        self.rect.topleft = (self.x, self.y)
+
+        self.scale_x = 1.0
+        self.scale_y = 1.0
+
+        self.vel.xy = (0, 0)
+        self.ext_vel.xy = (0, 0)
+        self.total_vel.xy = (0, 0)
+
+        self.health = health
+        self.damage = damage
+        self.dash_speed = dash_speed
+
+        self.process_timer = 24
+        self.cooldown = 60
+        self.flicker_timer = 0
+
+        self.pursued = False
+    
     def bullet_collision(self, bullets):
         for bullet in bullets:
             if self.rect.colliderect(bullet.rect):
@@ -102,6 +124,8 @@ class EnemyManager:
     def __init__(self, tile_size):
         self.tile_size = tile_size
         self.enemies = []
+        self.inactive_enemies = []
+
         self.damages = [1]
         self.healths = [3]
         self.dash_speed = [6]
@@ -117,7 +141,13 @@ class EnemyManager:
         return
 
     def spawn(self, pos):
-        self.enemies.append(Enemy(self.tile_size, pos, random.choice(self.damages), random.choice(self.healths), random.choice(self.dash_speed)))
+        try:
+            enemy = self.inactive_enemies[-1]
+            enemy.reset(pos, random.choice(self.damages), random.choice(self.healths), random.choice(self.dash_speed))
+            self.enemies.append(enemy)
+            self.inactive_enemies.pop()
+        except IndexError:
+            self.enemies.append(Enemy(self.tile_size, pos, random.choice(self.damages), random.choice(self.healths), random.choice(self.dash_speed)))
     
     def draw_shadow(self, draw_surf, camera_offset):
         for enemy in self.enemies:

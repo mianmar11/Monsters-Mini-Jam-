@@ -10,7 +10,7 @@ from scripts.entities.enemy import EnemyManager
 from scripts.weapon.ranged import RangeWeapon
 from scripts.effects.shockwave import Shockwave
 from scripts.utilities.camera import Camera
-from scripts.effects.particle import Particle
+from scripts.effects.particle import Particle, ParticleManager
 from scripts.utilities.cursor import Cursor
 
 from scripts.utilities.text import TextManager
@@ -43,7 +43,7 @@ class Game:
         self.mx, self.my = pygame.mouse.get_pos()
         
         self.shockwaves = []
-        self.particles = []
+        self.particle_manager = ParticleManager(self.tile_size)
 
         self.chunk_surfs = {} # cached tiles on chunk surfaces only used for rendering
         self.ground_tiles = {}
@@ -109,6 +109,7 @@ class Game:
 
         self.weapon = RangeWeapon(self.tile_size)
         self.bullet_manager = BulletManager(self.tile_size)
+        self.particle_manager = ParticleManager(self.tile_size)
 
         self.radius = 0
         self.fade_in = False
@@ -176,8 +177,7 @@ class Game:
         for shockwave in self.shockwaves:
             shockwave.draw_shadow(self.shadow_surf, camera_offset)
 
-        for particle in self.particles:
-            particle.draw_shadow(self.shadow_surf, camera_offset)
+        self.particle_manager.draw_shadow(self.shadow_surf, camera_offset)
 
         self.window.blit(self.shadow_surf, (0, 0))  # Draw shadows onto main window
 
@@ -189,9 +189,7 @@ class Game:
         for shockwave in self.shockwaves:
             shockwave.draw(self.window, camera_offset)
 
-        self.particles[:] = [particle for particle in self.particles if not particle.update(self.dt)]
-        for particle in self.particles:
-            particle.draw(self.window, camera_offset)
+        self.particle_manager.draw(self.window, camera_offset)
 
         # render player health
         for i in range(self.player.total_health):
@@ -213,24 +211,32 @@ class Game:
                 
                 # enemy bullet collision
                 if entity.rect.colliderect(bullet.rect):
+
                     if entity.deduct_health(bullet.damage):
+
                         if self.controller != None:
                             self.controller.stop_rumble()
                             self.controller.rumble(5, 5, 100)
 
                         self.camera.start_shake(4)
                         self.sfx.play("hit")
-                        self.particles += [Particle((entity.rect.centerx + random.randint(8, 10), entity.rect.centery + random.randint(8, 10)), bullet.angle + random.randint(10, 30) * random.choice([-1, 1]), self.tile_size, None) for i in range(random.randint(1, 4))]
+                        # self.particle_manager += [Particle((entity.rect.centerx + random.randint(8, 10), entity.rect.centery + random.randint(8, 10)), bullet.angle + random.randint(10, 30) * random.choice([-1, 1]), self.tile_size, None) for i in range(random.randint(1, 4))]
+                        pos = (entity.rect.centerx + random.randint(8, 10), entity.rect.centery + random.randint(8, 10))
+                        angle = bullet.angle + random.randint(10, 30) * random.choice([-1, 1])
+                        collided_obj = None
+                        self.particle_manager.add_particle(pos, angle, collided_obj, random.randint(1, 4))
 
-                        entity.ext_vel = vec2(1, 0).rotate(bullet.angle).normalize() * 4 # knockback
+                        entity.ext_vel += vec2(1, 0).rotate(bullet.angle).normalize() * 4 # knockback
                         entity.get_pursue()
 
                         if entity.health <= 0:
                             self.shockwaves.append(Shockwave(entity.rect.center, self.tile_size))
+                            self.enemy_manager.inactive_enemies.append(entity)
                             self.enemy_manager.enemies.remove(entity)
 
                         bullet.piercing -= 1
                         if bullet.piercing <= 0:
+                            self.bullet_manager.inactive_bullets.append(bullet)
                             self.bullet_manager.bullets.remove(bullet)
 
             # enemy player collision
@@ -247,7 +253,7 @@ class Game:
 
                     angle = math.degrees(math.atan2(dy, dx))
 
-                    self.player.ext_vel = vec2(-1, 0).rotate(angle).normalize() * self.tile_size # kb
+                    self.player.ext_vel += vec2(-1, 0).rotate(angle).normalize() * self.tile_size # kb
 
                     self.game_state()
 
@@ -256,12 +262,17 @@ class Game:
                         self.controller.rumble(10, 10, 100)
 
     def tile_bullet_collision(self):
-        for bullet in self.bullet_manager.bullets:
+        for bullet in self.bullet_manager.bullets[:]:
             pos = get_offset(bullet, [self.tile_size]*2)
             destroy = bullet.destroy()
             collided = bullet.collision(self.tiles.get(pos, None))
             if destroy or collided:
-                self.particles += [Particle((bullet.rect.centerx + random.randint(8, 10) * random.randint(-1, 1), bullet.rect.centery + random.randint(8, 10) * random.randint(-1, 1)), bullet.angle + random.randint(10, 30) * random.choice([-1, 1]), self.tile_size, self.tiles.get(pos, None)) for i in range(random.randint(1, 2))]
+                # self.particle_manager += [Particle((bullet.rect.centerx + random.randint(8, 10) * random.randint(-1, 1), bullet.rect.centery + random.randint(8, 10) * random.randint(-1, 1)), bullet.angle + random.randint(10, 30) * random.choice([-1, 1]), self.tile_size, self.tiles.get(pos, None)) for i in range(random.randint(1, 2))]
+                bullet_pos = (bullet.rect.centerx + random.randint(8, 10) * random.randint(-1, 1), bullet.rect.centery + random.randint(8, 10) * random.randint(-1, 1))
+                angle = bullet.angle + random.randint(10, 30) * random.choice([-1, 1])
+                collided_obj = self.tiles.get(pos, None)
+                self.particle_manager.add_particle(bullet_pos, angle, collided_obj, random.randint(1, 4))
+                self.bullet_manager.inactive_bullets.append(bullet)
                 self.bullet_manager.bullets.remove(bullet)
 
     def game_state(self):
@@ -326,13 +337,16 @@ class Game:
                 self.text_manager.queue_text(f"Wave {self.wave}", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2)})
 
     def shoot(self, mx, my, mbutton, camera_offset):
-        angle = math.degrees(math.atan2(my + camera_offset[1] - self.player.rect.centery, mx + camera_offset[0] - self.player.rect.centerx))
         if mbutton[0]:
             if self.weapon.shoot():
                 self.sfx.play('shoot', 1)
+                angle = math.degrees(math.atan2(my + camera_offset[1] - self.player.rect.centery, mx + camera_offset[0] - self.player.rect.centerx))
                 self.bullet_manager.add_bullet(self.player.rect.center, angle + random.randint(-2, 2))
+                if self.weapon.multishot:
+                    self.bullet_manager.add_bullet(self.player.rect.center, angle - 16 + random.randint(-2, 2))
+                    self.bullet_manager.add_bullet(self.player.rect.center, angle + 16 + random.randint(-2, 2))
 
-                self.player.ext_vel = vec2(-1, 0).rotate(angle).normalize() * 1 # knockback
+                self.player.ext_vel += vec2(-1, 0).rotate(angle).normalize() * 1 # knockback
                 if abs(self.player.ext_vel.x) > abs(self.player.ext_vel.y):
                     self.player.scale(0.8, 1)
                 else:
@@ -350,6 +364,7 @@ class Game:
                 
         camera_offset = self.camera.offset(self.player, self.dt, self.mx, self.my)
         self.player.update(self.dt)
+        self.particle_manager.update(self.dt)
         
         if self.game_started and self.lost == False:
             self.shoot(self.mx, self.my, self.mbutton, camera_offset)

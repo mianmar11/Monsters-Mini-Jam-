@@ -3,7 +3,6 @@ from pygame.math import Vector2 as vec2
 
 class Particle:
     def __init__(self, pos, angle, tile_size, collided_obj):
-        self.ori_pos = pos
         self.pos = list(pos)
         self.tile_size = tile_size
         self.angle = angle # the angle which bullet went
@@ -26,6 +25,19 @@ class Particle:
 
         # self.color = random.choice(['#a27c54', '#c99a6a', '#bb9064'])
     
+    def reset(self, pos, angle, collided_obj):
+        self.pos = list(pos)
+        self.angle = angle
+        
+        if collided_obj == None:
+            self.color = random.choices(["yellow", 'white'], weights=[1, 5], k=1)[0]
+        elif collided_obj.tile_type in ['dirt', 'dirt2']:
+            self.color = random.choice(['#d9a066', '#bc8750', '#663931'])
+        self.image.fill(self.color)
+        
+        self.size = self.ori_size
+        self.vel = vec2(random.choices([1, -1], weights=[1, 20], k=1)[0], 0).rotate(self.angle).normalize() * random.randint(2, 6)
+
     def draw_shadow(self, draw_surf, camera_offset):
         img = pygame.transform.scale(self.shadow_image, (self.size, self.size))
         img = pygame.transform.rotate(img, self.angle)
@@ -63,3 +75,36 @@ class Particle:
         if self.size <= 0:
             return True
         return
+
+
+class ParticleManager:
+    def __init__(self, tile_size):
+        self.tile_size = tile_size
+        self.particles = []
+        self.inactive_particles = []
+    
+    def add_particle(self, pos, angle, collided_obj, amount=1):
+        for i in range(amount):
+            try:
+                particle = self.inactive_particles[-1]
+                particle.reset(pos, angle, collided_obj)
+                self.inactive_particles.pop()
+                self.particles.append(particle)
+            except IndexError:
+                self.particles.append(Particle(pos, angle, self.tile_size, collided_obj))
+    
+    def draw_shadow(self, draw_surf, camera_offset):
+        for particle in self.particles:
+            particle.draw_shadow(draw_surf, camera_offset)
+
+    def draw(self, draw_surf, camera_offset):
+        for particle in self.particles:
+            particle.draw(draw_surf, camera_offset)
+
+    def update(self, delta_time):
+        self.dt = delta_time
+
+        expired = [p for p in self.particles if p.update(self.dt)]
+        self.inactive_particles.extend(expired)
+        self.particles = [p for p in self.particles if p not in expired]
+

@@ -4,6 +4,8 @@ class RangeWeapon:
 
         self.cooldown = 12
         self.cooldown_timer = 0
+
+        self.multishot = False
     
     def shoot(self):
         if self.cooldown_timer <= 0:

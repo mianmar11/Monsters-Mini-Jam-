@@ -2,7 +2,7 @@ import pygame, math, random
 from pygame.math import Vector2 as vec2
 
 class Bullet:
-    def __init__(self, tile_size, pos, angle, piercing=1):
+    def __init__(self, tile_size, pos, angle, piercing=1, damage=1):
         self.tile_size = tile_size
         self.angle = angle
 
@@ -28,13 +28,29 @@ class Bullet:
         self.flash = pygame.Surface((self.tile_size, self.tile_size)).convert_alpha()
         self.flash.fill('white')
         self.flash = pygame.transform.rotate(self.flash, random.randint(0, 45))
-        self.flash_timer = 0.8
+        self.flash_timer = 1
 
         self.destruction_timer = 1000
 
         self.piercing = piercing
+        self.damage = damage
 
-        self.damage = 1
+    def reset(self, pos, angle, piercing=1, damage=1):
+        self.angle = angle
+        self.piercing = piercing
+        self.damage = damage
+        self.destruction_timer = 1000
+        self.flash_timer = 1
+        
+        self.x, self.y = pos[0] + self.tile_size * math.cos(math.radians(self.angle)), pos[1] + self.tile_size * math.sin(math.radians(self.angle))
+        self.rect = pygame.Rect((0, 0), (self.hitbox[2], self.hitbox[3]))
+        self.rect.center = (self.x, self.y)
+
+        self.vel = vec2(1, 0).rotate(self.angle)
+
+        self.image = pygame.transform.rotozoom(self.ori_image.copy(), -self.angle, 1)
+        self.shadow = pygame.mask.from_surface(self.image.copy())
+        self.shadow = self.shadow.to_surface(unsetcolor=(255, 255, 255, 255), setcolor=(0, 0, 0, 255))
 
     def draw_shadow(self, draw_surf, camera_offset):
         img = self.image
@@ -87,11 +103,19 @@ class BulletManager:
         self.tile_size = tile_size
 
         self.bullets = []
+        self.inactive_bullets = [] # bullets whcih are destroyed
+
         self.damage = 1
         self.piercing = 1
 
     def add_bullet(self, pos, angle):
-        self.bullets.append(Bullet(self.tile_size, pos, angle, self.piercing))
+        try:
+            bullet = self.inactive_bullets[-1]
+            bullet.reset(pos, angle, self.piercing, self.damage)
+            self.inactive_bullets.pop()
+            self.bullets.append(bullet)
+        except IndexError:
+            self.bullets.append(Bullet(self.tile_size, pos, angle, self.piercing, self.damage))
     
     def draw_shadow(self, draw_surf, camera_offset):
         for bullet in self.bullets:
