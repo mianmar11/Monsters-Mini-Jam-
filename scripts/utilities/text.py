@@ -33,6 +33,12 @@ class TextManager:
             pos = {"topleft": (10, 10)}  # Default position
 
         self.render_queue.append([text, font, pos, cooldown])
+    
+    def render_text(self, text, font, pos, draw_surf):
+        img = font.render(text, False, 'white')
+        rect = img.get_rect(**pos)
+
+        draw_surf.blit(img, rect)
 
     def draw(self, draw_surf, dt):
         """
@@ -42,9 +48,7 @@ class TextManager:
         
         for item in self.render_queue.copy():
             text, font, pos, cooldown = item
-            img = font.render(text, False, "white")
-            rect = img.get_rect(**pos)
-            draw_surf.blit(img, rect)
+            self.render_text(text, font, pos, draw_surf)
 
             if item[-1] != None:
                 item[-1] -= dt

@@ -1,4 +1,4 @@
-import pygame, random, math
+import pygame, random, math, time
 from pygame.math import Vector2 as vec2
 
 from scripts.tiling.terrain import generate_world_data
@@ -47,11 +47,11 @@ class Game:
 
         self.chunk_surfs = {} # cached tiles on chunk surfaces only used for rendering
         self.ground_tiles = {}
-        self.tiles = {}
+        self.tiles = {} # collideable tiles
 
         self.load()
 
-        self.spawn_radius = 10 # hostile mobs will not spawn within this radius
+        self.spawn_prot_radius = 10 # hostile mobs will not spawn within this radius
         spawn_area =  [pos for pos, tile in self.ground_tiles.items() if tile.tile_type not in ('air', 'edge')]
         self.spawn_area = [pos for pos in spawn_area if self.tiles[pos].tile_type in ('air', 'edge')]
         spawn_point = random.choice([pos for pos in self.spawn_area if ((pos[0] - self.WORLD_MAP_SIZE[0]//2)**2 + (pos[1] - self.WORLD_MAP_SIZE[1]//2)**2)**0.5 < self.WORLD_MAP_SIZE[1]/3])
@@ -74,7 +74,7 @@ class Game:
     
     def spawn_enemies(self, amount):
         player_offset = get_offset(self.player, [self.tile_size]*2)
-        spawn_area = [pos for pos in self.spawn_area if get_distance(player_offset, pos) > self.spawn_radius]
+        spawn_area = [pos for pos in self.spawn_area if get_distance(player_offset, pos) > self.spawn_prot_radius]
         for i in range(amount):
             self.enemy_manager.spawn(random.choice(spawn_area))
 
@@ -196,6 +196,9 @@ class Game:
             if i < self.player.health:
                 pygame.draw.rect(self.window, 'red', (10 + i * self.tile_size, 10, self.tile_size/1.5, self.tile_size/1.5))
             pygame.draw.rect(self.window, 'white', (10 + i * self.tile_size, 10, self.tile_size/1.5, self.tile_size/1.5), 1)
+        
+        if self.weapon.reloading():
+            self.text_manager.render_text("reloading", self.text_manager.SMALL_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 - self.tile_size)}, self.window)
 
     def minimap(self):
         pygame.draw.rect(self.window, (0, 0, 0), (self.WIDTH - self.WORLD_MAP_SIZE[0], 0, self.WORLD_MAP_SIZE[0], self.WORLD_MAP_SIZE[1]), 1)
@@ -453,6 +456,9 @@ class Game:
                     self.fade_in = False
                     self.text_manager.render_queue.clear()
                     self.restart()
+            
+            if event.key == pygame.K_F2:
+                pygame.image.save(self.window, f"screenshots/screenshot_{time.time()}.png")
 
         if event.type == pygame.JOYDEVICEADDED:
             self.controller = pygame.joystick.Joystick(0)
