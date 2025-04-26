@@ -73,7 +73,7 @@ class Game:
         self.text_manager.queue_text(f"Wave {self.wave}", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2)})
     
     def spawn_enemies(self, amount):
-        player_offset = get_offset(self.player, [self.tile_size]*2)
+        player_offset = get_rect_offset(self.player, [self.tile_size]*2)
         spawn_area = [pos for pos in self.spawn_area if get_distance(player_offset, pos) > self.spawn_radius]
         for i in range(amount):
             self.enemy_manager.spawn(random.choice(spawn_area))
@@ -155,55 +155,108 @@ class Game:
         self.chunking(self.tiles)
 
     def draw(self, camera_offset):
-        player_chunk_offset = get_offset(self.player, (self.chunk_size[0] * self.tile_size, self.chunk_size[1] * self.tile_size))
-        neighbor_offsets = [(-1, -1), (0, -1), (1, -1),
-                            (-1, 0), (0, 0), (1, 0),
-                            (-1, 1), (0, 1), (1, 1)]
+        def draw_chunks():
+            player_chunk_offset = get_rect_offset(self.player, (self.chunk_size[0] * self.tile_size, self.chunk_size[1] * self.tile_size))
+            neighbor_offsets = [(-1, -1), (0, -1), (1, -1),
+                                (-1, 0), (0, 0), (1, 0),
+                                (-1, 1), (0, 1), (1, 1)]
 
-        for offset in neighbor_offsets:
-            chunk_offset = (player_chunk_offset[0] + offset[0], player_chunk_offset[1] + offset[1])
-            try:
-                self.window.blit(self.chunk_surfs[chunk_offset], [chunk_offset[0] * self.chunk_size[0] * self.tile_size - camera_offset[0], chunk_offset[1] * self.chunk_size[1] * self.tile_size - camera_offset[1]])
-            except KeyError:
-                pass
+            for offset in neighbor_offsets:
+                chunk_offset = (player_chunk_offset[0] + offset[0], player_chunk_offset[1] + offset[1])
+                try:
+                    self.window.blit(self.chunk_surfs[chunk_offset], [chunk_offset[0] * self.chunk_size[0] * self.tile_size - camera_offset[0], chunk_offset[1] * self.chunk_size[1] * self.tile_size - camera_offset[1]])
+                except KeyError:
+                    pass
         
-        # clear shadow surf
-        self.shadow_surf.fill((255, 255, 255))
-        
-        # Draw shadows
-        for obj in (self.enemy_manager, self.player, self.bullet_manager):
-            obj.draw_shadow(self.shadow_surf, camera_offset)
+        def draw_shadows():
+            # clear shadow surf
+            self.shadow_surf.fill((255, 255, 255))
+            
+            # Draw shadows
+            for obj in (self.enemy_manager, self.player, self.bullet_manager):
+                obj.draw_shadow(self.shadow_surf, camera_offset)
 
-        for shockwave in self.shockwaves:
-            shockwave.draw_shadow(self.shadow_surf, camera_offset)
+            for shockwave in self.shockwaves:
+                shockwave.draw_shadow(self.shadow_surf, camera_offset)
 
-        self.particle_manager.draw_shadow(self.shadow_surf, camera_offset)
+            self.particle_manager.draw_shadow(self.shadow_surf, camera_offset)
 
-        self.window.blit(self.shadow_surf, (0, 0))  # Draw shadows onto main window
+            self.window.blit(self.shadow_surf, (0, 0))  # Draw shadows onto main window
 
-        # Draw objects
-        for obj in (self.enemy_manager, self.player, self.bullet_manager):
-            obj.draw(self.window, camera_offset)
+        def draw_entities():
+            for obj in (self.enemy_manager, self.player, self.bullet_manager):
+                obj.draw(self.window, camera_offset)
 
-        self.shockwaves[:] = [shockwave for shockwave in self.shockwaves if not shockwave.update(self.dt)]
-        for shockwave in self.shockwaves:
-            shockwave.draw(self.window, camera_offset)
+        def entities_tiles_draw_order():
+            # Draw order with Entities
+            for obj in (*self.enemy_manager.enemies, *self.bullet_manager.bullets, self.player):
+                obj_offset = get_rect_offset(obj, [self.tile_size]*2)
+                for i in [-1, 0, 1]:
+                    try:
+                        if not self.tiles[(obj_offset[0]+i, obj_offset[1]+1)].tile_type in ['air', 'edge']:
+                            self.tiles[(obj_offset[0]+i, obj_offset[1]+1)].draw(self.window, camera_offset)
+                    except KeyError:
+                        pass
 
-        self.particle_manager.draw(self.window, camera_offset)
+        def draw_effects():
+            for shockwave in self.shockwaves:
+                shockwave.draw(self.window, camera_offset)
 
-        # render player health
-        for i in range(self.player.total_health):
-            if i < self.player.health:
-                pygame.draw.rect(self.window, 'red', (10 + i * self.tile_size, 10, self.tile_size/1.5, self.tile_size/1.5))
-            pygame.draw.rect(self.window, 'white', (10 + i * self.tile_size, 10, self.tile_size/1.5, self.tile_size/1.5), 1)
+            self.particle_manager.draw(self.window, camera_offset)
 
-    def minimap(self):
+        def draw_ui():
+            # render player health
+            for i in range(self.player.total_health):
+                if i < self.player.health:
+                    pygame.draw.rect(self.window, 'red', (10 + i * self.tile_size, 10, self.tile_size/1.5, self.tile_size/1.5))
+                pygame.draw.rect(self.window, 'white', (10 + i * self.tile_size, 10, self.tile_size/1.5, self.tile_size/1.5), 1)
+            
+            self.cursor.draw(self.window, (self.mx, self.my))
+
+        draw_chunks()
+        draw_shadows()
+        draw_entities()
+        entities_tiles_draw_order()
+        draw_effects()
+        draw_ui()
+
+    def draw_minimap(self):
         pygame.draw.rect(self.window, (0, 0, 0), (self.WIDTH - self.WORLD_MAP_SIZE[0], 0, self.WORLD_MAP_SIZE[0], self.WORLD_MAP_SIZE[1]), 1)
         for entity in self.enemy_manager.enemies:
-            enemy_offset = get_offset(entity, [self.tile_size]*2)
+            enemy_offset = get_rect_offset(entity, [self.tile_size]*2)
             pygame.draw.rect(self.window, 'white', (enemy_offset[0] + self.WIDTH - self.WORLD_MAP_SIZE[0], enemy_offset[1], 2, 2))
-        player_offset = get_offset(self.player, [self.tile_size]*2)
+        player_offset = get_rect_offset(self.player, [self.tile_size]*2)
         pygame.draw.rect(self.window, 'blue', (player_offset[0] + self.WIDTH - self.WORLD_MAP_SIZE[0], player_offset[1], 2, 2))
+
+    def draw_transition(self):
+        if self.game_started == False:
+            if self.radius < self.WIDTH/2 + self.tile_size * 5:
+                self.radius += 10 * self.dt
+            else:
+                self.game_started = True
+
+        if self.lost:
+            # fade in 
+            if self.fade_in:
+                if self.radius > 0:
+                    self.radius -= 10 * self.dt
+                else:
+                    self.text_manager.queue_text("You Died", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 - self.tile_size)}, None)
+                    self.text_manager.queue_text("Press R to restart", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 + self.tile_size)}, None)
+                    self.text_manager.queue_text("Thank you for playing!", self.text_manager.SMALL_FONT, {'center': (self.WIDTH/2, self.HEIGHT - self.tile_size)}, None)
+
+            # fade out
+            else:
+                if self.radius < self.WIDTH/2 + self.tile_size * 5:
+                    self.radius += 10 * self.dt
+                else:
+                    self.lost = False
+
+        if self.game_started == False or self.lost:      
+            self.fade.fill((0, 0, 0))
+            self.fade.set_colorkey((255, 255, 255))
+            pygame.draw.circle(self.fade, (255, 255, 255), (self.WIDTH/2, self.HEIGHT/2), self.radius)
+            self.window.blit(self.fade, (0, 0))
 
     def entities_collisions(self):
         for entity in self.enemy_manager.enemies:
@@ -263,7 +316,7 @@ class Game:
 
     def tile_bullet_collision(self):
         for bullet in self.bullet_manager.bullets[:]:
-            pos = get_offset(bullet, [self.tile_size]*2)
+            pos = get_rect_offset(bullet, [self.tile_size]*2)
             destroy = bullet.destroy()
             collided = bullet.collision(self.tiles.get(pos, None))
             if destroy or collided:
@@ -363,8 +416,10 @@ class Game:
             self.controller_trig()
                 
         camera_offset = self.camera.offset(self.player, self.dt, self.mx, self.my)
+        self.cursor.update(self.dt)
         self.player.update(self.dt)
         self.particle_manager.update(self.dt)
+        self.shockwaves[:] = [shockwave for shockwave in self.shockwaves if not shockwave.update(self.dt)]
         
         if self.game_started and self.lost == False:
             self.shoot(self.mx, self.my, self.mbutton, camera_offset)
@@ -373,7 +428,8 @@ class Game:
             if len(self.bullet_manager.bullets) > 0 or self.player.rect.topleft != self.player.ori_pos:
                 self.enemy_manager.pursued = True
 
-            player_offset = get_offset(self.player, [self.tile_size]*2)
+            # Player movement collision
+            player_offset = get_rect_offset(self.player, [self.tile_size]*2)
             collide_tiles = []
             for offset in [(-1, 0), (0, -1), (1, 0), (0, 1), (-1, -1), (1, -1), (-1, 1), (1, 1)]:
                 tile_offset = (player_offset[0] + offset[0], player_offset[1] + offset[1])
@@ -383,6 +439,7 @@ class Game:
                     collide_tiles.append(self.tiles[tile_offset]) if self.tiles[tile_offset].tile_type not in ['air', 'edge'] else None
             self.player.move(collide_tiles)
 
+            # entities udpates collision
             self.enemy_manager.update(self.dt, self.player, self.ground_tiles, self.tiles)
             self.weapon.update(self.dt)
             self.bullet_manager.update(self.dt)
@@ -393,40 +450,11 @@ class Game:
             self.spawn_wave()
 
         self.draw(camera_offset)
-        self.minimap()
-        self.cursor.update(self.dt, self.window, (self.mx, self.my))
+        self.draw_minimap()
         
         # UI 
         # will only run once at the start of the program
-        if self.game_started == False:
-            if self.radius < self.WIDTH/2 + self.tile_size * 5:
-                self.radius += 10 * self.dt
-            else:
-                self.game_started = True
-
-        if self.lost:
-            # fade in 
-            if self.fade_in:
-                if self.radius > 0:
-                    self.radius -= 10 * self.dt
-                else:
-                    self.text_manager.queue_text("You Died", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 - self.tile_size)}, None)
-                    self.text_manager.queue_text("Press R to restart", self.text_manager.BIG_FONT, {'center': (self.WIDTH/2, self.HEIGHT/2 + self.tile_size)}, None)
-                    self.text_manager.queue_text("Thank you for playing!", self.text_manager.SMALL_FONT, {'center': (self.WIDTH/2, self.HEIGHT - self.tile_size)}, None)
-
-            # fade out
-            else:
-                if self.radius < self.WIDTH/2 + self.tile_size * 5:
-                    self.radius += 10 * self.dt
-                else:
-                    self.lost = False
-
-        if self.game_started == False or self.lost:      
-            self.fade.fill((0, 0, 0))
-            self.fade.set_colorkey((255, 255, 255))
-            pygame.draw.circle(self.fade, (255, 255, 255), (self.WIDTH/2, self.HEIGHT/2), self.radius)
-            self.window.blit(self.fade, (0, 0))
-
+        self.draw_transition()
         self.text_manager.draw(self.window, self.dt)
 
     def controller_trig(self):
