@@ -25,8 +25,7 @@ class Cursor:
             render_y = pos[1] - img.get_height()/2
             draw_surf.blit(img, (render_x, render_y))
 
-    def update(self, delta_time, draw_surf, pos):
+    def update(self, delta_time):
         self.dt = delta_time
 
         self.angle += self.dt
-        self.draw(draw_surf, pos)
