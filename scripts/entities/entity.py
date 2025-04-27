@@ -121,16 +121,12 @@ class Entity:
         self.dt = delta_time
         self.rescale()
 
-        # Decay external velocity smoothly
-        self.ext_vel.x += (0 - self.ext_vel.x) * min(self.dt * 10, 1.0)
-        self.ext_vel.y += (0 - self.ext_vel.y) * min(self.dt * 10, 1.0)
+        self.ext_vel.x += (0 - self.ext_vel.x) * 0.5 * self.dt
+        self.ext_vel.y += (0 - self.ext_vel.y) * 0.5 * self.dt
         
-        # Dynamic small value threshold based on dt
-        threshold = max(0.01 * self.dt, 0.0001)
-
-        if abs(self.ext_vel.x) < threshold:
+        if abs(self.ext_vel.x) < 0.001:
             self.ext_vel.x = 0
-        if abs(self.ext_vel.y) < threshold:
+        if abs(self.ext_vel.y) < 0.001:
             self.ext_vel.y = 0
         
         self.damage_timer -= self.dt

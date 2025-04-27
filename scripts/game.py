@@ -279,7 +279,7 @@ class Game:
                         collided_obj = None
                         self.particle_manager.add_particle(pos, angle, collided_obj, random.randint(1, 4))
 
-                        entity.ext_vel += vec2(1, 0).rotate(bullet.angle).normalize() * 4 # knockback
+                        entity.ext_vel += bullet.vel * bullet.speed * 0.5 # knockback as % of bullet's speed
                         entity.get_pursue()
 
                         if entity.health <= 0:
