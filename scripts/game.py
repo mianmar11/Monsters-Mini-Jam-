@@ -193,7 +193,7 @@ class Game:
                 obj_offset = get_rect_offset(obj, [self.tile_size]*2)
                 for i in [-1, 0, 1]:
                     try:
-                        if not self.tiles[(obj_offset[0]+i, obj_offset[1]+1)].tile_type in ['air', 'edge']:
+                        if not self.tiles[(obj_offset[0]+i, obj_offset[1]+1)].tile_type in ['air']:
                             self.tiles[(obj_offset[0]+i, obj_offset[1]+1)].draw(self.window, camera_offset)
                     except KeyError:
                         pass
